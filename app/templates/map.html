@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive GIS Satellite Map — Semantic Satellite Change Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface-canvas": "#0F172A",
+            "surface-card": "#1E293B",
+            "surface-hover": "#27354A",
+            "surface-border": "#334155",
+            "primary": "#0284C7",
+            "primary-hover": "#0369A1"
+          },
+          fontFamily: {
+            "display": ["Geist", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/style.css">
+
+  <!-- Leaflet GIS Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <style>
+    .map-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      gap: 16px;
+      height: calc(100vh - 180px);
+      min-height: 640px;
+    }
+    @media (max-width: 1200px) {
+      .map-wrapper {
+        grid-template-columns: 1fr 380px;
+      }
+    }
+    @media (max-width: 992px) {
+      .map-wrapper {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      #leaflet_map {
+        min-height: 520px;
+      }
+    }
+    #leaflet_map {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-subtle);
+      background: #0F172A;
+      z-index: 1;
+    }
+    .district-pill {
+      background: #1E293B;
+      border: 1px solid #334155;
+      color: #CBD5E1;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      box-shadow: var(--shadow-subtle);
+      font-weight: 500;
+    }
+    .district-pill:hover, .district-pill.active {
+      background: #27354A;
+      border-color: #38BDF8;
+      color: #38BDF8;
+      font-weight: 600;
+      transform: translateY(-1px);
+    }
+    .gis-toggle-btn {
+      background: #1E293B;
+      border: 1px solid #334155;
+      color: #CBD5E1;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      user-select: none;
+      box-shadow: var(--shadow-subtle);
+    }
+    .gis-toggle-btn:hover {
+      background: #27354A;
+      color: #F8FAFC;
+      border-color: #475569;
+    }
+    .gis-toggle-btn.active {
+      background: rgba(2, 132, 199, 0.25);
+      border-color: #38BDF8;
+      color: #38BDF8;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+    .gis-toggle-btn.active-amber {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: #F59E0B;
+      color: #FBBF24;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+    }
+    .leaflet-popup-content-wrapper {
+      background: #1E293B;
+      color: #F8FAFC;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .leaflet-popup-tip {
+      background: #1E293B;
+    }
+    .gis-sidebar {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      box-shadow: var(--shadow-card);
+      gap: 14px;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: #CBD5E1;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.6); opacity: 0.9; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+    @keyframes highlight-glow {
+      0%, 100% { stroke: #38BDF8; stroke-width: 3.5; stroke-opacity: 1; }
+      50% { stroke: #818CF8; stroke-width: 5; stroke-opacity: 0.8; }
+    }
+
+    /* Before / After Split Slider */
+    .split-slider-container {
+      position: relative;
+      width: 100%;
+      height: 270px;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      border: 1px solid #334155;
+      background: #0F172A;
+      user-select: none;
+    }
+    .slider-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      pointer-events: none;
+    }
+    .slider-before-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      clip-path: inset(0 50% 0 0);
+      -webkit-clip-path: inset(0 50% 0 0);
+    }
+    .slider-before-wrapper .slider-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      object-fit: cover !important;
+      object-position: center !important;
+    }
+    .slider-tag {
+      position: absolute;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      z-index: 5;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .slider-tag.tag-before {
+      top: 8px;
+      left: 8px;
+      background: rgba(2, 132, 199, 0.9);
+      color: #fff;
+    }
+    .slider-tag.tag-after {
+      top: 8px;
+      right: 8px;
+      background: rgba(217, 119, 6, 0.9);
+      color: #fff;
+    }
+    .slider-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #38BDF8;
+      pointer-events: none;
+      z-index: 6;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+    }
+    .slider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      background: #1E293B;
+      border: 2px solid #38BDF8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #38BDF8;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.4);
+    }
+    .slider-range-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+      z-index: 10;
+      margin: 0;
+    }
+
+    /* Sub-tabs for Image View Modes */
+    .img-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94A3B8;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 9px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .img-tab-btn:hover {
+      color: #F8FAFC;
+      background: #27354A;
+    }
+    .img-tab-btn.active {
+      color: #38BDF8;
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    /* Fullscreen Comparison Modal */
+    .diff-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(11, 19, 43, 0.75);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .diff-modal-backdrop.active {
+      display: flex;
+    }
+    .diff-modal-content {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      max-width: 960px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      animation: modalFadeIn 0.22s ease;
+      color: #F8FAFC;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .diff-modal-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0F172A;
+    }
+    .diff-modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body class="bg-[#0F172A] text-slate-100 font-sans min-h-screen flex antialiased selection:bg-cyan-500 selection:text-white">
+  {% include 'sidebar.html' %}
+
+  <!-- Main Workspace -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen bg-[#0F172A] p-4 overflow-y-auto">
+    <!-- Top Sticky Bar -->
+    <header class="h-16 px-4 mb-3 flex items-center justify-between border border-slate-800 bg-[#0F172A]/90 backdrop-blur-md shadow-xs rounded-xl">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">🗺️</span>
+        <div>
+          <h2 class="text-base font-display font-bold text-slate-100 tracking-tight">Interactive GIS Satellite Map</h2>
+          <p class="text-[11px] font-mono text-slate-400">Tamil Nadu Multi-Temporal Observation • 443,144 Georeferenced Parcels</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-800/80 text-xs font-mono text-emerald-300 flex items-center gap-1.5 font-bold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 radar-dot"></span>
+          443,144 Parcels Active
+        </span>
+      </div>
+    </header>
+
+    <!-- Map Controls Bar -->
+    <section class="card" style="margin-bottom: 12px; padding: 12px 18px; background: #1E293B; border: 1px solid #334155;">
+      <!-- Row 1: Fly-to District Shortcuts & Filter Selects -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <!-- Fly-to District Shortcuts -->
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 12px; color: #94A3B8; font-weight: 600;">FLY TO:</span>
+          <span class="district-pill active" onclick="flyToDistrict('all')">🗺️ All Tamil Nadu</span>
+          <span class="district-pill" onclick="flyToDistrict('chennai')">🏙️ Chennai</span>
+          <span class="district-pill" onclick="flyToDistrict('coimbatore')">🏭 Coimbatore</span>
+          <span class="district-pill" onclick="flyToDistrict('karur')">🌾 Karur</span>
+          <span class="district-pill" onclick="flyToDistrict('ariyalur')">🏛️ Ariyalur</span>
+          <span class="district-pill" onclick="flyToDistrict('chengalpattu')">🌲 Chengalpattu</span>
+        </div>
+
+        <!-- Filter Selects -->
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <select id="gis_filter_class" onchange="fetchAndRenderMarkers()" class="form-select" style="font-size: 12px; padding: 5px 12px; background: #0F172A; border: 1px solid #334155; color: #F8FAFC;">
+            <option value="all">All Land-Cover Classes</option>
+            <option value="water">💧 Water</option>
+            <option value="building">🏢 Building</option>
+            <option value="road">🛣️ Road</option>
+            <option value="vegetation">🌿 Vegetation</option>
+            <option value="bare_land">⏳ Bare Land</option>
+          </select>
+
+          <select id="gis_filter_type" onchange="fetchAndRenderMarkers()" class="form-select" style="font-size: 12px; padding: 5px 12px; background: #0F172A; border: 1px solid #334155; color: #F8FAFC;">
+            <option value="all">All Change Dynamics</option>
+            <option value="new">New</option>
+            <option value="removed">Removed</option>
+            <option value="expanded">Expanded</option>
+            <option value="transition">Transition</option>
+          </select>
+
+          <select id="gis_filter_limit" onchange="fetchAndRenderMarkers()" class="form-select" style="font-size: 12px; padding: 5px 12px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; background: #0F172A;">
+            <option value="500">500 Changes (Fast Preview)</option>
+            <option value="1500" selected>1,500 Changes (Detailed Density)</option>
+            <option value="3000">3,000 Changes (Dense Footprints)</option>
+            <option value="6000">6,000 Changes (Ultra Dense)</option>
+          </select>
+
+          <span id="marker_count_badge" class="badge badge-secondary" style="font-family: var(--font-mono); font-size: 11px;">
+            Loading regions...
+          </span>
+        </div>
+      </div>
+
+      <!-- Row 2: GIS Layer Toggles & Full Tile Projection Controls -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #334155;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <span style="font-size: 11.5px; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Display Boundaries:</span>
+          
+          <button id="toggleTileBoundariesBtn" class="gis-toggle-btn active" onclick="toggleTileBoundaries()" title="Toggle full satellite tile footprints (768x768 px bounds)">
+            🔲 Mark Tile Boundaries
+          </button>
+          
+          <button id="toggleFootprintsBtn" class="gis-toggle-btn active" onclick="toggleFootprints()" title="Mark exact rectangular boundary footprints of detected change regions">
+            📦 Mark Region Footprints
+          </button>
+          
+          <button id="toggleDotsBtn" class="gis-toggle-btn" onclick="toggleDots()" title="Optional circular dot markers">
+            ⭕ Dot Markers
+          </button>
+
+          <div style="height: 18px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+
+          <span style="font-size: 11.5px; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Map Projections:</span>
+
+          <button id="projectBeforeBtn" class="gis-toggle-btn" onclick="toggleProjectedTile('before')" title="Project full Before (T1) satellite imagery directly onto the map coordinates">
+            🛰️ Project Before Tile
+          </button>
+
+          <button id="projectAfterBtn" class="gis-toggle-btn" onclick="toggleProjectedTile('after')" title="Project full After (T2) satellite imagery directly onto the map coordinates">
+            ⚡ Project After Tile
+          </button>
+
+          <button id="projectDiffBtn" class="gis-toggle-btn" onclick="toggleProjectedTile('diff')" title="Project clear difference heatmap overlay directly onto the map coordinates">
+            🔬 Project Change Diff
+          </button>
+        </div>
+
+        <div style="display: inline-flex; align-items: center; gap: 8px;">
+          <span style="font-size: 11px; color: #94A3B8;">Projection Opacity:</span>
+          <input type="range" id="overlayOpacityRange" min="10" max="100" value="85" style="width: 80px; accent-color: var(--accent-primary); cursor: pointer;" oninput="updateOverlayOpacity(this.value)">
+          <span id="overlayOpacityLabel" style="font-size: 11px; font-family: var(--font-mono); color: #94A3B8; min-width: 32px;">85%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Map & Split Inspection Sidebar -->
+    <div class="map-wrapper">
+      <!-- Left: Interactive Leaflet Map -->
+      <div style="position: relative;">
+        <div id="leaflet_map"></div>
+
+        <!-- Float Map Legend -->
+        <div style="position: absolute; bottom: 20px; left: 20px; z-index: 1000; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(8px); border: 1px solid #334155; padding: 8px 14px; border-radius: var(--radius-md); display: flex; gap: 14px; flex-wrap: wrap; box-shadow: var(--shadow-card);">
+          <div class="legend-item"><span class="legend-dot" style="background: #06b6d4;"></span> Water</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #ef4444;"></span> Building</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #38bdf8;"></span> Road</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #22c55e;"></span> Vegetation</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #f59e0b;"></span> Bare Land</div>
+          <div class="legend-item" style="border-left: 1px solid #334155; padding-left: 10px;">
+            <span style="display: inline-block; width: 14px; height: 10px; border: 1.5px dashed #38BDF8; border-radius: 2px;"></span> Tile Boundary
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Detailed Region & Full Tile Inspection Sidebar -->
+      <aside class="gis-sidebar" id="gis_sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+          <h3 style="font-size: 15px; margin: 0; display: flex; align-items: center; gap: 8px; color: #F8FAFC; font-weight: 700;">
+            <span>🛰️</span> Full Scene & Region Inspector
+          </h3>
+          <span id="sidebar_tile_badge" class="badge badge-secondary" style="font-family: var(--font-mono); font-size: 10.5px;">Tile Info</span>
+        </div>
+
+        <div id="sidebar_empty_state" style="text-align: center; padding: 70px 14px; color: #94A3B8; font-size: 13px;">
+          <p style="font-size: 36px; margin-bottom: 12px;">🗺️</p>
+          <p style="font-weight: 600; color: #F8FAFC; margin-bottom: 6px;">Select Any Detected Region or Tile</p>
+          <p style="line-height: 1.5;">Click on any region footprint or tile outline on the map to inspect its full 768×768 Before vs After imagery, split slider, area in m², and AI evidence.</p>
+        </div>
+
+        <div id="sidebar_content" style="display: none; flex-direction: column; gap: 14px;">
+          <!-- FULL SATELLITE SCENE VIEWER -->
+          <div style="background: #1E293B; border: 1px solid #334155; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-subtle);">
+            <!-- View Mode Tabs -->
+            <div style="display: flex; gap: 4px; padding: 6px 8px; background: #0F172A; border-bottom: 1px solid #334155; flex-wrap: wrap;">
+              <button class="img-tab-btn active" id="tab_split" onclick="switchSidebarTab('split')">↔️ Split Reveal</button>
+              <button class="img-tab-btn" id="tab_before" onclick="switchSidebarTab('before')">⏪ Full Before (T1)</button>
+              <button class="img-tab-btn" id="tab_after" onclick="switchSidebarTab('after')">⏩ Full After (T2)</button>
+              <button class="img-tab-btn" id="tab_diff" onclick="switchSidebarTab('diff')">⚡ Full Diff</button>
+              <button class="img-tab-btn" id="tab_crop" onclick="switchSidebarTab('crop')">🎯 Region Crop</button>
+            </div>
+
+            <!-- 1. Interactive Split Curtain Slider (Full Tile) -->
+            <div id="sidebar_split_container" class="split-slider-container">
+              <span class="slider-tag tag-before">BEFORE (T1)</span>
+              <span class="slider-tag tag-after">AFTER (T2)</span>
+
+              <img id="sidebar_slider_img_after" class="slider-img" src="" alt="Full Scene After (T2)">
+
+              <div class="slider-before-wrapper" id="sidebar_before_wrapper">
+                <img id="sidebar_slider_img_before" class="slider-img" src="" alt="Full Scene Before (T1)">
+              </div>
+
+              <div class="slider-divider" id="sidebar_slider_divider" style="left: 50%;">
+                <div class="slider-handle">↔</div>
+              </div>
+
+              <input type="range" min="0" max="100" value="50" class="slider-range-input" id="sidebar_slider_input" oninput="updateSidebarSlider(this.value)">
+            </div>
+
+            <!-- 2. Single Full Image Containers (for individual tabs) -->
+            <div id="sidebar_single_container" style="display: none; height: 270px; background: #0F172A; position: relative;">
+              <img id="sidebar_single_img" src="" alt="Satellite View" style="width: 100%; height: 100%; object-fit: contain;">
+              <span id="sidebar_single_badge" class="slider-tag tag-before" style="left: 8px; top: 8px;">FULL BEFORE</span>
+            </div>
+
+            <!-- Footer Caption & Quick Projection Bar -->
+            <div style="padding: 8px 10px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; background: #0F172A; border-top: 1px solid #334155;">
+              <span id="sidebar_image_caption" style="color: #94A3B8; font-family: var(--font-mono); font-size: 10.5px;">
+                Full Tile: 768 × 768 px
+              </span>
+              <div style="display: flex; gap: 6px;">
+                <button onclick="projectActiveSidebarTile()" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 7px;" title="Overlay this exact satellite image onto the map coordinates">
+                  🛰️ Project on Map
+                </button>
+                <button onclick="openMapDiffModal()" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 7px;" title="Open high-resolution fullscreen comparison slider">
+                  🔎 Fullscreen
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Region Attributes Card -->
+          <div style="background: #1E293B; border: 1px solid #334155; border-radius: var(--radius-md); padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h4 id="sidebar_title" style="font-size: 14px; font-weight: 700; color: #F8FAFC;">Region Details</h4>
+              <span id="sidebar_class_badge" class="badge badge-primary">Class</span>
+            </div>
+
+            <div style="font-size: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; color: #CBD5E1;">
+              <div>District: <strong id="sidebar_district" class="text-slate-100">-</strong></div>
+              <div>Change Type: <strong id="sidebar_change_type" class="text-slate-100">-</strong></div>
+              <div>Ground Area: <strong id="sidebar_area" class="text-emerald-400">- m²</strong></div>
+              <div>Confidence: <strong id="sidebar_conf" class="text-cyan-400">-</strong></div>
+              <div>Transition: <strong id="sidebar_transition" class="text-amber-400">-</strong></div>
+              <div>Score: <strong id="sidebar_score" class="text-slate-100">-</strong></div>
+            </div>
+
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #334155; font-size: 11px; color: #94A3B8; font-family: var(--font-mono); display: flex; justify-content: space-between; align-items: center;">
+              <span>📍 GPS: <span id="sidebar_coords" class="text-slate-200">-</span></span>
+              <a id="sidebar_gmaps_link" href="#" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; text-decoration: none;">Google Maps ↗</a>
+            </div>
+          </div>
+
+          <!-- Deep Action Links -->
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a id="sidebar_inspect_btn" href="#" class="btn btn-primary btn-sm" style="text-align: center; text-decoration: none; font-size: 12.5px; font-weight: 600;">
+              🔬 Deep Evidence & Contours Inspection
+            </a>
+            <a id="sidebar_similar_btn" href="/semantic-search" class="btn btn-secondary btn-sm" style="text-align: center; text-decoration: none; font-size: 12px;">
+              🧠 Find Similar Regions (AI Multimodal Search)
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Fullscreen Hi-Res Before / After Comparison Modal -->
+  <div id="mapDiffCompareModal" class="diff-modal-backdrop" onclick="if(event.target===this) closeMapDiffModal()">
+    <div class="diff-modal-content">
+      <div class="diff-modal-header">
+        <div>
+          <h3 id="modalTitle" style="font-size: 16px; font-weight: 700; margin: 0 0 4px 0; color: #F8FAFC;">Full Satellite Scene Comparison (768 × 768 px)</h3>
+          <div style="display: flex; gap: 12px; font-size: 12px;">
+            <span id="modalDistrict" style="color: #38bdf8; font-weight: 600;">📍 District</span>
+            <span id="modalClass" style="font-weight: 700;">● CLASS</span>
+            <span id="modalScene" style="color: #94A3B8; font-family: var(--font-mono);">SCENE_ID</span>
+          </div>
+        </div>
+        <button onclick="closeMapDiffModal()" style="background: transparent; border: none; font-size: 20px; color: #94A3B8; cursor: pointer; padding: 4px 8px;">&times;</button>
+      </div>
+
+      <div class="diff-modal-body">
+        <!-- Main Large Split Curtain Slider -->
+        <div class="split-slider-container" id="modalSliderContainer" style="max-width: 560px; height: 280px; margin: 0 auto;">
+          <span class="slider-tag tag-before">BEFORE (T1 SATELLITE)</span>
+          <span class="slider-tag tag-after">AFTER (T2 SATELLITE)</span>
+
+          <img id="modalImgAfter" class="slider-img" alt="After (T2)">
+
+          <div class="slider-before-wrapper" id="modalBeforeWrapper">
+            <img id="modalImgBefore" class="slider-img" alt="Before (T1)">
+          </div>
+
+          <div class="slider-divider" id="modalSliderDivider" style="left: 50%;">
+            <div class="slider-handle">↔</div>
+          </div>
+
+          <input type="range" min="0" max="100" value="50" class="slider-range-input" id="modalSliderInput" oninput="updateModalSlider(this.value)">
+        </div>
+
+        <!-- Secondary Side-by-Side Panels: Clear Difference & Semantic Map -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+          <div style="background: #0F172A; border: 1px solid #334155; border-radius: 8px; padding: 8px; text-align: center;">
+            <div style="font-size: 11px; font-weight: 700; color: #F87171; margin-bottom: 6px; text-transform: uppercase;">
+              ⚡ Clear Detected Changes (Difference Mask)
+            </div>
+            <img id="modalImgDiff" style="width: 100%; height: 120px; object-fit: cover; background: #000; border-radius: 4px;" alt="Clear Difference">
+          </div>
+
+          <div style="background: #0F172A; border: 1px solid #334155; border-radius: 8px; padding: 8px; text-align: center;">
+            <div style="font-size: 11px; font-weight: 700; color: #38bdf8; margin-bottom: 6px; text-transform: uppercase;">
+              🎯 Full Tile Overlay / Semantic Map
+            </div>
+            <img id="modalImgOverlay" style="width: 100%; height: 120px; object-fit: cover; background: #000; border-radius: 4px;" alt="Overlay Map">
+          </div>
+        </div>
+
+        <!-- Modal Bottom Actions Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #334155; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 12px; color: #38bdf8; font-weight: 600;">
+            📍 Coordinates: <span id="modalCoords" style="color: #F8FAFC; font-family: var(--font-mono);">-</span>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button onclick="projectActiveSidebarTile(); closeMapDiffModal();" class="btn btn-primary btn-sm" style="font-size: 12px;">
+              🛰️ Project On Live Map
+            </button>
+            <a id="modalGmapsBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="text-decoration: none; font-size: 12px;">
+              ↗️ Google Maps
+            </a>
+            <a id="modalInspectBtn" href="#" class="btn btn-secondary btn-sm" style="text-decoration: none; font-size: 12px;">
+              🔬 Inspect Full Contours
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    const districtCenters = {{ district_centers | tojson | safe }};
+    let currentDistrict = "{{ initial_district }}";
+    let map = null;
+    let tilesLayer = null;
+    let footprintsLayer = null;
+    let dotsLayer = null;
+    let districtBoundariesLayer = null;
+    let imageOverlayLayer = null;
+    let activeHighlightLayer = null;
+
+    let allGisRegions = [];
+    let allGisTiles = [];
+    let selectedRegion = null;
+    let selectedTile = null;
+
+    // Layer display flags
+    let showTileBoundaries = true;
+    let showFootprints = true;
+    let showDots = false; // Default false per user request: "i didnot want like this kind of dot ,can you mark the tail fully"
+
+    // Projected Tile Overlay State
+    let currentProjectedOverlay = null;
+    let currentProjectedMode = null; // 'before' | 'after' | 'diff'
+
+    const classColors = {
+      'water': '#06b6d4',
+      'building': '#ef4444',
+      'road': '#38bdf8',
+      'vegetation': '#22c55e',
+      'bare_land': '#f59e0b'
+    };
+
+    // Initialize Leaflet Map
+    function initMap() {
+      const initialCenter = districtCenters[currentDistrict] || districtCenters['all'];
+      map = L.map('leaflet_map', {
+        center: [initialCenter.lat, initialCenter.lon],
+        zoom: initialCenter.zoom,
+        zoomControl: true
+      });
+
+      // Base Layers
+      const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri & Maxar, Earthstar Geographics',
+        maxZoom: 18
+      });
+
+      const darkMatter = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap & CARTO',
+        maxZoom: 19
+      });
+
+      const osmStandard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+      });
+
+      // Default to Esri Satellite
+      esriSatellite.addTo(map);
+
+      // Layer Control
+      const baseMaps = {
+        "🛰️ Esri Satellite": esriSatellite,
+        "🌑 Dark Matter": darkMatter,
+        "🗺️ OpenStreetMap": osmStandard
+      };
+
+      // GIS Feature Layers
+      tilesLayer = L.layerGroup().addTo(map);
+      footprintsLayer = L.layerGroup().addTo(map);
+      dotsLayer = L.layerGroup(); // Not added to map by default
+      imageOverlayLayer = L.layerGroup().addTo(map);
+      activeHighlightLayer = L.layerGroup().addTo(map);
+      districtBoundariesLayer = L.layerGroup().addTo(map);
+
+      const overlayMaps = {
+        "🔲 Tile Boundaries": tilesLayer,
+        "📦 Region Footprints": footprintsLayer,
+        "⭕ Dot Markers": dotsLayer,
+        "🛰️ Projected Satellite Tiles": imageOverlayLayer,
+        "🏛️ District Footprints": districtBoundariesLayer
+      };
+
+      L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(map);
+
+      // Load district footprint polygons
+      loadDistrictFootprints();
+
+      // Fetch change region markers & tiles
+      fetchAndRenderMarkers();
+    }
+
+    async function loadDistrictFootprints() {
+      try {
+        const res = await fetch('/api/gis/districts-geojson');
+        const data = await res.json();
+        if (data && data.features) {
+          L.geoJSON(data, {
+            style: {
+              color: '#38bdf8',
+              weight: 1.5,
+              dashArray: '4, 4',
+              fillColor: '#38bdf8',
+              fillOpacity: 0.03
+            },
+            onEachFeature: function(feature, layer) {
+              const label = feature.properties ? feature.properties.label || feature.properties.tile_id : 'District Footprint';
+              layer.bindTooltip(label, { sticky: true });
+            }
+          }).addTo(districtBoundariesLayer);
+        }
+      } catch (err) {
+        console.warn('Could not load district GeoJSON:', err);
+      }
+    }
+
+    async function fetchAndRenderMarkers() {
+      const semClass = document.getElementById('gis_filter_class').value;
+      const chgType = document.getElementById('gis_filter_type').value;
+      const limitVal = document.getElementById('gis_filter_limit') ? document.getElementById('gis_filter_limit').value : 1500;
+
+      let url = `/api/gis/regions?district=${encodeURIComponent(currentDistrict)}&semantic_class=${encodeURIComponent(semClass)}&change_type=${encodeURIComponent(chgType)}&limit=${limitVal}`;
+
+      document.getElementById('marker_count_badge').innerText = 'Fetching regions & tiles...';
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.status === 'success') {
+          allGisRegions = data.regions || [];
+          allGisTiles = data.tiles || [];
+          window.lastTotalDbCount = data.total_db_count || 443097;
+          renderAllGisFeatures(allGisRegions, allGisTiles);
+        }
+      } catch (err) {
+        console.error('Error fetching GIS regions:', err);
+        document.getElementById('marker_count_badge').innerText = 'Error loading markers';
+      }
+    }
+
+    function renderAllGisFeatures(regions, tiles) {
+      tilesLayer.clearLayers();
+      footprintsLayer.clearLayers();
+      dotsLayer.clearLayers();
+      activeHighlightLayer.clearLayers();
+
+      const totalDb = (window.lastTotalDbCount || 443097).toLocaleString();
+      document.getElementById('marker_count_badge').innerText = `Displaying ${regions.length.toLocaleString()} Regions across ${tiles.length} Tiles (from ${totalDb} Total Changes in DB)`;
+
+      // 1. Render Full Satellite Tile Boundaries (Rectangles)
+      tiles.forEach(tile => {
+        if (!tile.bounds) return;
+        const tileRect = L.rectangle(tile.bounds, {
+          color: '#38bdf8',
+          weight: 1.8,
+          dashArray: '6, 6',
+          fillColor: '#38bdf8',
+          fillOpacity: 0.04,
+          interactive: true
+        });
+
+        tileRect.bindTooltip(`
+          <div style="font-family: var(--font-sans); font-size: 11.5px; padding: 2px;">
+            <strong style="color: #38bdf8;">🛰️ ${tile.scene_id}</strong><br>
+            <span>📍 ${tile.district} • ${tile.region_count} Detected Regions</span>
+          </div>
+        `, { sticky: true, opacity: 0.95 });
+
+        tileRect.on('click', () => {
+          selectTileForSidebar(tile);
+        });
+
+        tileRect.addTo(tilesLayer);
+      });
+
+      // 2. Render Exact Region Bounding Footprints & Optional Dots
+      regions.forEach(r => {
+        const color = classColors[r.semantic_class] || '#8b949e';
+
+        // Exact Footprint Rectangle (Replacing circular dots)
+        if (r.bounds) {
+          const footprintRect = L.rectangle(r.bounds, {
+            color: color,
+            weight: 2,
+            fillColor: color,
+            fillOpacity: 0.38,
+            interactive: true
+          });
+
+          footprintRect.on('mouseover', function() {
+            this.setStyle({ weight: 3.5, fillOpacity: 0.65 });
+          });
+
+          footprintRect.on('mouseout', function() {
+            if (!selectedRegion || selectedRegion.id !== r.id) {
+              this.setStyle({ weight: 2, fillOpacity: 0.38 });
+            }
+          });
+
+          footprintRect.bindTooltip(`
+            <div style="font-size: 11.5px; font-family: var(--font-sans);">
+              <strong style="color: ${color};">● ${r.semantic_class.toUpperCase()} #${r.region_id}</strong><br>
+              <span>${r.change_type.toUpperCase()} • ${(r.area_m2 || 0).toLocaleString()} m²</span>
+            </div>
+          `, { sticky: true });
+
+          footprintRect.on('click', () => {
+            selectRegionForSidebar(r.id);
+          });
+
+          footprintRect.addTo(footprintsLayer);
+        }
+
+        // Optional Circle Marker Dot
+        const radius = Math.max(5, Math.min(18, Math.sqrt(r.area_m2 || 100) / 10));
+        const dotMarker = L.circleMarker([r.lat, r.lon], {
+          radius: radius,
+          color: '#ffffff',
+          weight: 1.2,
+          fillColor: color,
+          fillOpacity: 0.75
+        });
+
+        dotMarker.on('click', () => {
+          selectRegionForSidebar(r.id);
+        });
+
+        dotMarker.addTo(dotsLayer);
+      });
+
+      // Maintain layer visibility based on toggle states
+      if (showTileBoundaries && !map.hasLayer(tilesLayer)) map.addLayer(tilesLayer);
+      if (!showTileBoundaries && map.hasLayer(tilesLayer)) map.removeLayer(tilesLayer);
+
+      if (showFootprints && !map.hasLayer(footprintsLayer)) map.addLayer(footprintsLayer);
+      if (!showFootprints && map.hasLayer(footprintsLayer)) map.removeLayer(footprintsLayer);
+
+      if (showDots && !map.hasLayer(dotsLayer)) map.addLayer(dotsLayer);
+      if (!showDots && map.hasLayer(dotsLayer)) map.removeLayer(dotsLayer);
+
+      // If initial target was provided, select it
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetRegionId = urlParams.get('region_id');
+      const targetLat = parseFloat(urlParams.get('lat'));
+      const targetLon = parseFloat(urlParams.get('lon'));
+      if (targetRegionId && !selectedRegion) {
+        selectRegionForSidebar(targetRegionId, targetLat, targetLon);
+      }
+    }
+
+    // Toggle Functions for Layer Controls
+    function toggleTileBoundaries() {
+      showTileBoundaries = !showTileBoundaries;
+      const btn = document.getElementById('toggleTileBoundariesBtn');
+      if (showTileBoundaries) {
+        map.addLayer(tilesLayer);
+        btn.classList.add('active');
+      } else {
+        map.removeLayer(tilesLayer);
+        btn.classList.remove('active');
+      }
+    }
+
+    function toggleFootprints() {
+      showFootprints = !showFootprints;
+      const btn = document.getElementById('toggleFootprintsBtn');
+      if (showFootprints) {
+        map.addLayer(footprintsLayer);
+        btn.classList.add('active');
+      } else {
+        map.removeLayer(footprintsLayer);
+        btn.classList.remove('active');
+      }
+    }
+
+    function toggleDots() {
+      showDots = !showDots;
+      const btn = document.getElementById('toggleDotsBtn');
+      if (showDots) {
+        map.addLayer(dotsLayer);
+        btn.classList.add('active');
+      } else {
+        map.removeLayer(dotsLayer);
+        btn.classList.remove('active');
+      }
+    }
+
+    // Toggle Satellite Tile Projection directly onto Map coordinates via L.imageOverlay
+    function toggleProjectedTile(mode) {
+      // mode: 'before' | 'after' | 'diff'
+      const target = selectedTile || (selectedRegion ? {
+        bounds: selectedRegion.tile_bounds || selectedRegion.bounds,
+        full_before_url: selectedRegion.full_before_url,
+        full_after_url: selectedRegion.full_after_url,
+        full_diff_url: selectedRegion.full_diff_url
+      } : (allGisTiles[0] || null));
+
+      if (!target || !target.bounds) {
+        alert("Please select a region or tile first to project its satellite imagery onto the map.");
+        return;
+      }
+
+      if (currentProjectedMode === mode) {
+        // Toggle off
+        if (currentProjectedOverlay) {
+          imageOverlayLayer.removeLayer(currentProjectedOverlay);
+          currentProjectedOverlay = null;
+        }
+        currentProjectedMode = null;
+        updateProjectButtons();
+        return;
+      }
+
+      // Toggle on new mode
+      if (currentProjectedOverlay) {
+        imageOverlayLayer.removeLayer(currentProjectedOverlay);
+        currentProjectedOverlay = null;
+      }
+
+      let imgUrl = target.full_before_url;
+      if (mode === 'after') imgUrl = target.full_after_url;
+      else if (mode === 'diff') imgUrl = target.full_diff_url;
+
+      const opacity = parseFloat(document.getElementById('overlayOpacityRange').value) / 100;
+      currentProjectedOverlay = L.imageOverlay(imgUrl, target.bounds, {
+        opacity: opacity,
+        interactive: true
+      });
+      currentProjectedOverlay.addTo(imageOverlayLayer);
+      currentProjectedMode = mode;
+      updateProjectButtons();
+
+      if (!map.getBounds().contains(target.bounds)) {
+        map.fitBounds(target.bounds, { padding: [30, 30], maxZoom: 16 });
+      }
+    }
+
+    function updateProjectButtons() {
+      document.getElementById('projectBeforeBtn').classList.toggle('active', currentProjectedMode === 'before');
+      document.getElementById('projectAfterBtn').classList.toggle('active-amber', currentProjectedMode === 'after');
+      document.getElementById('projectDiffBtn').classList.toggle('active', currentProjectedMode === 'diff');
+    }
+
+    function updateOverlayOpacity(val) {
+      document.getElementById('overlayOpacityLabel').innerText = val + '%';
+      if (currentProjectedOverlay) {
+        currentProjectedOverlay.setOpacity(parseFloat(val) / 100);
+      }
+    }
+
+    function projectActiveSidebarTile() {
+      toggleProjectedTile('after');
+    }
+
+    // Select Region for Sidebar and highlight its boundary on the map
+    function selectRegionForSidebar(regionIdentifier, expectedLat, expectedLon) {
+      let region = null;
+
+      if (expectedLat !== undefined && expectedLon !== undefined && !isNaN(expectedLat) && !isNaN(expectedLon)) {
+        const candidates = allGisRegions.filter(r => 
+          String(r.id) === String(regionIdentifier) || 
+          String(r.region_id) === String(regionIdentifier)
+        );
+        if (candidates.length > 0) {
+          candidates.sort((a, b) => {
+            const da = Math.hypot(a.lat - expectedLat, a.lon - expectedLon);
+            const db = Math.hypot(b.lat - expectedLat, b.lon - expectedLon);
+            return da - db;
+          });
+          region = candidates[0];
+        } else {
+          // Find closest region to coordinates
+          const sorted = [...allGisRegions].sort((a, b) => {
+            const da = Math.hypot(a.lat - expectedLat, a.lon - expectedLon);
+            const db = Math.hypot(b.lat - expectedLat, b.lon - expectedLon);
+            return da - db;
+          });
+          if (sorted.length > 0 && Math.hypot(sorted[0].lat - expectedLat, sorted[0].lon - expectedLon) < 0.15) {
+            region = sorted[0];
+          }
+        }
+      }
+
+      if (!region) {
+        region = allGisRegions.find(r => String(r.id) === String(regionIdentifier));
+      }
+      if (!region) {
+        region = allGisRegions.find(r => String(r.region_id) === String(regionIdentifier));
+      }
+      if (!region) return;
+
+      selectedRegion = region;
+      selectedTile = allGisTiles.find(t => t.scene_id === region.scene_id) || {
+        scene_id: region.scene_id,
+        run_id: region.run_id,
+        district: region.district,
+        bounds: region.tile_bounds || region.bounds,
+        full_before_url: region.full_before_url,
+        full_after_url: region.full_after_url,
+        full_diff_url: region.full_diff_url,
+        full_overlay_url: region.full_overlay_url
+      };
+
+      document.getElementById('sidebar_empty_state').style.display = 'none';
+      const content = document.getElementById('sidebar_content');
+      content.style.display = 'flex';
+
+      document.getElementById('sidebar_tile_badge').innerText = region.scene_id || 'Satellite Tile';
+      document.getElementById('sidebar_title').innerText = `${region.district} — Region #${region.region_id}`;
+      document.getElementById('sidebar_class_badge').innerText = region.semantic_class.toUpperCase();
+      document.getElementById('sidebar_class_badge').style.background = classColors[region.semantic_class] || '#38bdf8';
+      document.getElementById('sidebar_district').innerText = region.district;
+      document.getElementById('sidebar_change_type').innerText = region.change_type.toUpperCase();
+      document.getElementById('sidebar_area').innerText = `${(region.area_m2 || 0).toLocaleString()} m²`;
+      document.getElementById('sidebar_conf').innerText = region.confidence_category || 'VALID';
+      document.getElementById('sidebar_transition').innerText = `${region.t1_class} ➔ ${region.t2_class}`;
+      document.getElementById('sidebar_score').innerText = region.change_score;
+      document.getElementById('sidebar_coords').innerText = `${region.lat.toFixed(5)}° N, ${region.lon.toFixed(5)}° E`;
+      document.getElementById('sidebar_gmaps_link').href = `https://www.google.com/maps?q=${region.lat},${region.lon}`;
+
+      // Synchronize pin position and popup if pin is active
+      if (window.activePinMarker) {
+        window.activePinMarker.setLatLng([region.lat, region.lon]);
+        window.activePinMarker.setPopupContent(`
+          <div style="font-family: var(--font-sans); min-width: 220px;">
+            <h4 style="color: #38bdf8; margin-bottom: 4px; font-size: 14px;">📍 EXACT DETECTED PIN</h4>
+            <p style="font-size: 12px; margin: 4px 0;"><strong>District:</strong> ${region.district.toUpperCase()}</p>
+            <p style="font-size: 12px; margin: 4px 0; font-family: monospace;"><strong>GPS:</strong> ${region.lat.toFixed(5)}° N, ${region.lon.toFixed(5)}° E</p>
+            <p style="font-size: 12px; margin: 4px 0;"><strong>Region:</strong> #${region.region_id}</p>
+            <p style="font-size: 11px; margin: 2px 0; color: var(--text-muted);">Tile: ${region.scene_id}</p>
+            <a href="https://www.google.com/maps?q=${region.lat},${region.lon}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="display: block; text-align: center; margin-top: 8px; font-size: 11.5px; text-decoration: none;">
+              🌐 Navigate in Google Maps
+            </a>
+          </div>
+        `);
+      }
+
+      // Populate Full Satellite Images
+      document.getElementById('sidebar_slider_img_before').src = region.full_before_url;
+      document.getElementById('sidebar_slider_img_after').src = region.full_after_url;
+
+      // Reset split slider to 50%
+      document.getElementById('sidebar_slider_input').value = 50;
+      updateSidebarSlider(50);
+      switchSidebarTab('split');
+
+      // Update deep action links
+      document.getElementById('sidebar_inspect_btn').href = `/region/${region.run_id}/${region.region_id}`;
+      document.getElementById('sidebar_similar_btn').href = `/semantic-search?region_id=${region.id || region.region_id}`;
+
+      // Highlight active region footprint with animated glowing border
+      activeHighlightLayer.clearLayers();
+      if (region.bounds) {
+        const highlightRect = L.rectangle(region.bounds, {
+          color: '#ffffff',
+          weight: 4,
+          fillColor: classColors[region.semantic_class] || '#38bdf8',
+          fillOpacity: 0.55,
+          interactive: false
+        });
+        highlightRect.addTo(activeHighlightLayer);
+      }
+    }
+
+    function selectTileForSidebar(tile) {
+      selectedTile = tile;
+      document.getElementById('sidebar_empty_state').style.display = 'none';
+      const content = document.getElementById('sidebar_content');
+      content.style.display = 'flex';
+
+      document.getElementById('sidebar_tile_badge').innerText = tile.scene_id;
+      document.getElementById('sidebar_title').innerText = `${tile.district} — Full Satellite Tile`;
+      document.getElementById('sidebar_class_badge').innerText = `${tile.region_count} REGIONS`;
+      document.getElementById('sidebar_class_badge').style.background = '#38bdf8';
+      document.getElementById('sidebar_district').innerText = tile.district;
+      document.getElementById('sidebar_change_type').innerText = 'MULTI-CLASS';
+      document.getElementById('sidebar_area').innerText = '768 × 768 px (~52 km²)';
+      document.getElementById('sidebar_conf').innerText = 'ACTIVE TILE';
+      document.getElementById('sidebar_transition').innerText = 'Scene T1 ➔ T2';
+      document.getElementById('sidebar_score').innerText = `${tile.region_count} detections`;
+
+      if (tile.bounds) {
+        const centerLat = (tile.bounds[0][0] + tile.bounds[1][0]) / 2;
+        const centerLon = (tile.bounds[0][1] + tile.bounds[1][1]) / 2;
+        document.getElementById('sidebar_coords').innerText = `${centerLat.toFixed(4)}° N, ${centerLon.toFixed(4)}° E`;
+        document.getElementById('sidebar_gmaps_link').href = `https://www.google.com/maps?q=${centerLat},${centerLon}`;
+      }
+
+      document.getElementById('sidebar_slider_img_before').src = tile.full_before_url;
+      document.getElementById('sidebar_slider_img_after').src = tile.full_after_url;
+      document.getElementById('sidebar_slider_input').value = 50;
+      updateSidebarSlider(50);
+      switchSidebarTab('split');
+
+      // Highlight active tile outline
+      activeHighlightLayer.clearLayers();
+      if (tile.bounds) {
+        L.rectangle(tile.bounds, {
+          color: '#ffffff',
+          weight: 3,
+          dashArray: '4, 4',
+          fillColor: '#38bdf8',
+          fillOpacity: 0.1,
+          interactive: false
+        }).addTo(activeHighlightLayer);
+      }
+    }
+
+    // Interactive Sidebar Split Slider Control
+    function updateSidebarSlider(val) {
+      val = Math.max(0, Math.min(100, parseFloat(val)));
+      const beforeWrapper = document.getElementById('sidebar_before_wrapper');
+      const divider = document.getElementById('sidebar_slider_divider');
+      if (beforeWrapper) {
+        beforeWrapper.style.clipPath = `inset(0 ${100 - val}% 0 0)`;
+        beforeWrapper.style.webkitClipPath = `inset(0 ${100 - val}% 0 0)`;
+      }
+      if (divider) {
+        divider.style.left = val + '%';
+      }
+    }
+
+    // Switch Sidebar Image View Modes
+    function switchSidebarTab(mode) {
+      document.querySelectorAll('.img-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('tab_' + mode);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const splitContainer = document.getElementById('sidebar_split_container');
+      const singleContainer = document.getElementById('sidebar_single_container');
+      const singleImg = document.getElementById('sidebar_single_img');
+      const singleBadge = document.getElementById('sidebar_single_badge');
+      const caption = document.getElementById('sidebar_image_caption');
+
+      const target = selectedRegion || selectedTile;
+      if (!target) return;
+
+      if (mode === 'split') {
+        splitContainer.style.display = 'block';
+        singleContainer.style.display = 'none';
+        caption.innerText = 'Interactive Split Curtain Reveal: Before (T1) vs After (T2)';
+        updateSidebarSlider(document.getElementById('sidebar_slider_input').value || 50);
+      } else {
+        splitContainer.style.display = 'none';
+        singleContainer.style.display = 'block';
+
+        if (mode === 'before') {
+          singleImg.src = target.full_before_url;
+          singleBadge.innerText = 'FULL BEFORE (T1)';
+          singleBadge.className = 'slider-tag tag-before';
+          caption.innerText = 'Pre-Change Satellite Scene (T1) • 768 × 768 px';
+        } else if (mode === 'after') {
+          singleImg.src = target.full_after_url;
+          singleBadge.innerText = 'FULL AFTER (T2)';
+          singleBadge.className = 'slider-tag tag-after';
+          caption.innerText = 'Post-Change Satellite Scene (T2) • 768 × 768 px';
+        } else if (mode === 'diff') {
+          singleImg.src = target.full_diff_url;
+          singleBadge.innerText = 'CLEAR DIFFERENCE MASK';
+          singleBadge.className = 'slider-tag tag-after';
+          caption.innerText = 'Binary Difference Mask & Heatmap • 768 × 768 px';
+        } else if (mode === 'crop') {
+          singleImg.src = target.crop_url || target.full_overlay_url;
+          singleBadge.innerText = '4-PANEL REGION CROP';
+          singleBadge.className = 'slider-tag tag-before';
+          caption.innerText = '4-Panel Visual Crop: T1 • T2 • Change • Semantic';
+        }
+      }
+    }
+
+    // Fullscreen Comparison Modal Logic
+    function openMapDiffModal() {
+      const target = selectedRegion || selectedTile;
+      if (!target) return;
+
+      document.getElementById('modalTitle').innerText = `${target.district} — Full Satellite Scene Comparison (768 × 768 px)`;
+      document.getElementById('modalDistrict').innerText = `📍 ${target.district}`;
+      document.getElementById('modalClass').innerText = `● ${(target.semantic_class || 'Tile').toUpperCase()}`;
+      document.getElementById('modalClass').style.color = classColors[target.semantic_class] || '#38bdf8';
+      document.getElementById('modalScene').innerText = target.scene_id;
+
+      document.getElementById('modalImgBefore').src = target.full_before_url;
+      document.getElementById('modalImgAfter').src = target.full_after_url;
+      document.getElementById('modalImgDiff').src = target.full_diff_url;
+      document.getElementById('modalImgOverlay').src = target.full_overlay_url || target.semantic_url || target.crop_url;
+
+      const coordsStr = target.lat ? `${target.lat.toFixed(5)}° N, ${target.lon.toFixed(5)}° E` : 'District Center';
+      document.getElementById('modalCoords').innerText = coordsStr;
+
+      if (target.lat && target.lon) {
+        document.getElementById('modalGmapsBtn').href = `https://www.google.com/maps?q=${target.lat},${target.lon}`;
+      }
+      if (target.run_id && target.region_id) {
+        document.getElementById('modalInspectBtn').href = `/region/${target.run_id}/${target.region_id}`;
+      }
+
+      document.getElementById('modalSliderInput').value = 50;
+      document.getElementById('mapDiffCompareModal').classList.add('active');
+
+      setTimeout(() => {
+        updateModalSlider(50);
+      }, 50);
+    }
+
+    function closeMapDiffModal() {
+      document.getElementById('mapDiffCompareModal').classList.remove('active');
+    }
+
+    function updateModalSlider(val) {
+      val = Math.max(0, Math.min(100, parseFloat(val)));
+      const beforeWrapper = document.getElementById('modalBeforeWrapper');
+      const divider = document.getElementById('modalSliderDivider');
+      if (beforeWrapper) {
+        beforeWrapper.style.clipPath = `inset(0 ${100 - val}% 0 0)`;
+        beforeWrapper.style.webkitClipPath = `inset(0 ${100 - val}% 0 0)`;
+      }
+      if (divider) {
+        divider.style.left = val + '%';
+      }
+    }
+
+    // Escape Key to Close Modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMapDiffModal();
+    });
+
+    // Fly To District Shortcut
+    function flyToDistrict(distKey) {
+      currentDistrict = distKey;
+      document.querySelectorAll('.district-pill').forEach(pill => {
+        pill.classList.remove('active');
+        if (pill.getAttribute('onclick').includes(distKey)) {
+          pill.classList.add('active');
+        }
+      });
+
+      const target = districtCenters[distKey] || districtCenters['all'];
+      if (map && target) {
+        map.flyTo([target.lat, target.lon], target.zoom, { duration: 1.2 });
+      }
+
+      fetchAndRenderMarkers();
+    }
+
+    window.addEventListener('resize', () => {
+      const sliderVal = document.getElementById('sidebar_slider_input').value || 50;
+      updateSidebarSlider(sliderVal);
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+
+      // Parse URL parameters for direct exact location navigation
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetLat = parseFloat(urlParams.get('lat'));
+      const targetLon = parseFloat(urlParams.get('lon'));
+      const targetZoom = parseInt(urlParams.get('zoom')) || 16;
+      const targetRegionId = urlParams.get('region_id');
+      const targetDistrict = urlParams.get('district');
+
+      if (targetDistrict && targetDistrict !== 'all') {
+        currentDistrict = targetDistrict.toLowerCase();
+        document.querySelectorAll('.district-pill').forEach(pill => {
+          pill.classList.remove('active');
+          if (pill.getAttribute('onclick').toLowerCase().includes(currentDistrict)) {
+            pill.classList.add('active');
+          }
+        });
+      }
+
+      if (!isNaN(targetLat) && !isNaN(targetLon)) {
+        setTimeout(() => {
+          map.flyTo([targetLat, targetLon], targetZoom, { duration: 1.5 });
+
+          // Add a pulsing pin at target coordinates
+          const highlightIcon = L.divIcon({
+            className: 'exact-location-pin',
+            html: `
+              <div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <div style="position: absolute; width: 40px; height: 40px; border-radius: 50%; background: rgba(56, 189, 248, 0.45); animation: pulse-ring 1.8s infinite cubic-bezier(0.215, 0.61, 0.355, 1);"></div>
+                <div style="position: absolute; width: 24px; height: 24px; border-radius: 50%; background: #38bdf8; border: 3px solid #ffffff; box-shadow: 0 0 14px rgba(56, 189, 248, 0.9); display: flex; align-items: center; justify-content: center;">
+                  <span style="font-size: 13px; line-height: 1;">📍</span>
+                </div>
+              </div>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+          });
+
+          const pinMarker = L.marker([targetLat, targetLon], { icon: highlightIcon, zIndexOffset: 1000 }).addTo(map);
+          window.activePinMarker = pinMarker;
+          pinMarker.bindPopup(`
+            <div style="font-family: var(--font-sans); min-width: 220px;">
+              <h4 style="color: #38bdf8; margin-bottom: 4px; font-size: 14px;">📍 EXACT DETECTED PIN</h4>
+              <p style="font-size: 12px; margin: 4px 0;"><strong>District:</strong> ${(targetDistrict || 'Tamil Nadu').toUpperCase()}</p>
+              <p style="font-size: 12px; margin: 4px 0; font-family: monospace;"><strong>GPS:</strong> ${targetLat.toFixed(5)}° N, ${targetLon.toFixed(5)}° E</p>
+              ${targetRegionId ? `<p style="font-size: 12px; margin: 4px 0;"><strong>Region:</strong> #${targetRegionId}</p>` : ''}
+              <a href="https://www.google.com/maps?q=${targetLat},${targetLon}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="display: block; text-align: center; margin-top: 8px; font-size: 11.5px; text-decoration: none;">
+                🌐 Navigate in Google Maps
+              </a>
+            </div>
+          `).openPopup();
+
+          if (targetRegionId) {
+            setTimeout(() => {
+              selectRegionForSidebar(targetRegionId, targetLat, targetLon);
+            }, 800);
+          }
+        }, 400);
+      }
+    });
+  </script>
+</body>
+</html>

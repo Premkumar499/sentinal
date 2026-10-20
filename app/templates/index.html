@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview Dashboard — Semantic Satellite Change Detection</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Google Fonts: Geist, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface-canvas": "#0F172A",
+            "surface-card": "#1E293B",
+            "surface-hover": "#27354A",
+            "surface-border": "#334155",
+            "primary": "#0284C7",
+            "primary-hover": "#0369A1"
+          },
+          fontFamily: {
+            "display": ["Geist", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-[#0F172A] text-slate-100 font-sans min-h-screen flex antialiased selection:bg-cyan-500 selection:text-white">
+  {% include 'sidebar.html' %}
+
+  <!-- Main Viewport -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen bg-[#0F172A] overflow-y-auto">
+
+    <!-- Top App Bar (Stitch Specification) -->
+    <header class="bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-800 h-16 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs">
+      <div class="flex items-center space-x-3">
+        <span class="bg-emerald-950/70 text-emerald-300 font-mono text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-emerald-800/80 flex items-center shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+          OPERATIONAL ORBITAL MONITORING
+        </span>
+        <span class="text-xs text-slate-600 font-mono hidden sm:inline">•</span>
+        <span class="text-xs text-slate-400 font-mono hidden sm:inline">Sentinel-2 MSI 10m GSD</span>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <a href="/map" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/90 text-xs font-semibold text-slate-200 hover:bg-slate-700/80 transition-all flex items-center gap-1.5 shadow-xs">
+          <span class="material-symbols-outlined text-[16px] text-cyan-400">map</span>
+          Interactive GIS Map
+        </a>
+        <a href="/reports" class="px-3 py-1.5 rounded-lg bg-cyan-950/70 border border-cyan-800/80 text-xs font-semibold text-cyan-300 hover:bg-cyan-900/60 transition-all flex items-center gap-1.5 shadow-xs">
+          <span class="material-symbols-outlined text-[16px]">assignment</span>
+          Audit Reports
+        </a>
+      </div>
+    </header>
+
+    <!-- Workspace Main Body -->
+    <main class="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+
+      <!-- Page Welcome Section -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xs font-mono font-bold text-cyan-400 tracking-wider uppercase">GEOSPATIAL INTELLIGENCE CONSOLE</span>
+          </div>
+          <h2 class="font-display text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight">
+            Satellite Change Detection Overview
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">
+            Statewide bi-temporal optical mutation tracking and semantic land-cover transition analytics.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="/semantic-search" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">travel_explore</span>
+            AI Semantic Search
+          </a>
+        </div>
+      </div>
+      
+      <!-- BENTO METRICS KPI ROW -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- 1. Statewide Reach -->
+        <div class="bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-6 shadow-md hover:border-cyan-500/50 hover:shadow-lg transition-all">
+          <div class="flex items-center justify-between text-slate-400 text-[11px] font-mono tracking-wider uppercase mb-2">
+            <span>Statewide Reach</span>
+            <span class="material-symbols-outlined text-cyan-400 text-[20px]">public</span>
+          </div>
+          <div class="font-display text-3xl font-black text-slate-100 tracking-tight mb-2">38 / 38</div>
+          <div class="flex items-center text-xs font-semibold text-emerald-400 gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>100% Tamil Nadu Districts Mapped</span>
+          </div>
+        </div>
+
+        <!-- 2. Bi-Temporal Imagery -->
+        <div class="bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-6 shadow-md hover:border-cyan-500/50 hover:shadow-lg transition-all">
+          <div class="flex items-center justify-between text-slate-400 text-[11px] font-mono tracking-wider uppercase mb-2">
+            <span>Bi-Temporal Imagery</span>
+            <span class="material-symbols-outlined text-cyan-400 text-[20px]">layers</span>
+          </div>
+          <div class="font-display text-3xl font-black text-slate-100 tracking-tight mb-2">12,991</div>
+          <div class="flex items-center text-xs text-slate-300 gap-1.5">
+            <span class="text-cyan-400 font-bold font-mono">2020 ↔ 2025</span>
+            <span class="text-slate-400">Sentinel-2 MSI Raster Tiles</span>
+          </div>
+        </div>
+
+        <!-- 3. Indexed Change Parcels -->
+        <div class="bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-6 shadow-md hover:border-amber-500/50 hover:shadow-lg transition-all">
+          <div class="flex items-center justify-between text-slate-400 text-[11px] font-mono tracking-wider uppercase mb-2">
+            <span>Indexed Change Parcels</span>
+            <span class="material-symbols-outlined text-amber-400 text-[20px]">radar</span>
+          </div>
+          <div class="font-display text-3xl font-black text-slate-100 tracking-tight mb-2">443,144</div>
+          <div class="flex items-center text-xs text-slate-300 gap-1.5">
+            <span class="text-amber-400 font-bold font-mono">2,781.4 km²</span>
+            <span class="text-slate-400">Total Physical Transitions</span>
+          </div>
+        </div>
+
+        <!-- 4. Dominant Dynamic -->
+        <div class="bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-6 shadow-md hover:border-emerald-500/50 hover:shadow-lg transition-all">
+          <div class="flex items-center justify-between text-slate-400 text-[11px] font-mono tracking-wider uppercase mb-2">
+            <span>Transition Dominance</span>
+            <span class="material-symbols-outlined text-emerald-400 text-[20px]">eco</span>
+          </div>
+          <div class="font-display text-3xl font-black text-emerald-400 tracking-tight mb-2">32.8%</div>
+          <div class="flex items-center text-xs font-medium text-slate-400 gap-1.5">
+            <span>Vegetation Clearing vs Regrowth</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: COMPREHENSIVE DATASET ANALYSIS STUDIO -->
+      <section class="bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-6 sm:p-7 shadow-md">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-700/80 gap-4">
+          <div>
+            <div class="flex items-center gap-2 text-cyan-400 text-xs font-mono font-semibold uppercase tracking-wider mb-1">
+              <span class="material-symbols-outlined text-[16px]">analytics</span>
+              <span>Ground Truth Multi-Spectral Transition Matrix</span>
+            </div>
+            <h3 class="font-display text-lg font-bold text-slate-100 tracking-tight">Dataset Analysis — Bi-Temporal Land Cover Dynamics</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Physical transformations cataloged across 443,144 satellite change polygons.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 text-[11px] font-mono text-slate-300 border border-slate-700">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              Statewide DB v1.0
+            </span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-left text-xs text-slate-300 border-collapse">
+            <thead>
+              <tr class="text-[11px] uppercase font-mono text-slate-400 bg-slate-900/80 border-b border-slate-700/80">
+                <th scope="col" class="py-3 px-4 font-semibold">Transition Dynamic</th>
+                <th scope="col" class="py-3 px-4 font-semibold">Source (2020)</th>
+                <th scope="col" class="py-3 px-4 font-semibold">Destination (2025)</th>
+                <th scope="col" class="py-3 px-4 font-semibold text-right">Event Count</th>
+                <th scope="col" class="py-3 px-4 font-semibold text-right">Area (ha)</th>
+                <th scope="col" class="py-3 px-4 font-semibold text-right">Surface (km²)</th>
+                <th scope="col" class="py-3 px-4 font-semibold" style="width: 180px;">Share (%)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700/60 font-sans">
+              <tr class="hover:bg-slate-700/30 transition-colors h-[48px]">
+                <td class="py-3.5 px-4 font-semibold text-slate-100 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  <span>Vegetation Clearing & Fallow</span>
+                </td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/80 font-mono">Vegetation</span></td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80 font-mono">Bare Land</span></td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-100">121,451</td>
+                <td class="py-3.5 px-4 text-right font-mono text-emerald-400 font-semibold">144,679 ha</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-300">1,446.8 km²</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 h-2 rounded-full bg-slate-900 overflow-hidden">
+                      <div class="h-full bg-amber-400 rounded-full" style="width: 27.4%;"></div>
+                    </div>
+                    <span class="font-mono text-xs font-bold text-amber-400 w-11 text-right">27.4%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-slate-700/30 transition-colors h-[48px]">
+                <td class="py-3.5 px-4 font-semibold text-slate-100 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span>Vegetation Regrowth & Cultivation</span>
+                </td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80 font-mono">Bare Land</span></td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/80 font-mono">Vegetation</span></td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-100">109,667</td>
+                <td class="py-3.5 px-4 text-right font-mono text-emerald-400 font-semibold">120,465 ha</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-300">1,204.6 km²</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 h-2 rounded-full bg-slate-900 overflow-hidden">
+                      <div class="h-full bg-emerald-400 rounded-full" style="width: 24.7%;"></div>
+                    </div>
+                    <span class="font-mono text-xs font-bold text-emerald-400 w-11 text-right">24.7%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-slate-700/30 transition-colors h-[48px]">
+                <td class="py-3.5 px-4 font-semibold text-slate-100 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                  <span>Road Network Construction</span>
+                </td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/80 font-mono">Vegetation</span></td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 font-mono">Road</span></td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-100">17,922</td>
+                <td class="py-3.5 px-4 text-right font-mono text-cyan-400 font-semibold">5,600 ha</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-300">56.0 km²</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 h-2 rounded-full bg-slate-900 overflow-hidden">
+                      <div class="h-full bg-cyan-400 rounded-full" style="width: 4.1%;"></div>
+                    </div>
+                    <span class="font-mono text-xs font-bold text-cyan-400 w-11 text-right">4.1%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-slate-700/30 transition-colors h-[48px]">
+                <td class="py-3.5 px-4 font-semibold text-slate-100 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                  <span>New Urban Building Infill</span>
+                </td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-950/70 text-amber-300 border border-amber-800/80 font-mono">Bare Land</span></td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-rose-950/70 text-rose-300 border border-rose-800/80 font-mono">Building</span></td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-rose-400">3,833</td>
+                <td class="py-3.5 px-4 text-right font-mono text-rose-400 font-semibold">1,532 ha</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-300">15.3 km²</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 h-2 rounded-full bg-slate-900 overflow-hidden">
+                      <div class="h-full bg-rose-400 rounded-full" style="width: 1.1%;"></div>
+                    </div>
+                    <span class="font-mono text-xs font-bold text-rose-400 w-11 text-right">1.1%</span>
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-slate-700/30 transition-colors h-[48px]">
+                <td class="py-3.5 px-4 font-semibold text-slate-100 flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                  <span>Building Encroachment on Green Canopy</span>
+                </td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-800/80 font-mono">Vegetation</span></td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-rose-950/70 text-rose-300 border border-rose-800/80 font-mono">Building</span></td>
+                <td class="py-3.5 px-4 text-right font-mono font-bold text-rose-400">2,930</td>
+                <td class="py-3.5 px-4 text-right font-mono text-rose-400 font-semibold">1,355 ha</td>
+                <td class="py-3.5 px-4 text-right font-mono text-slate-300">13.6 km²</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 h-2 rounded-full bg-slate-900 overflow-hidden">
+                      <div class="h-full bg-rose-500 rounded-full" style="width: 0.8%;"></div>
+                    </div>
+                    <span class="font-mono text-xs font-bold text-rose-400 w-11 text-right">0.8%</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION: REGIONAL LEADERBOARD -->
+      <section class="bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-6 lg:p-8 shadow-md">
+        <div class="pb-4 border-b border-slate-700/80 mb-6 flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h4 class="font-display font-bold text-slate-100 text-base">Top Change Districts</h4>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">Statewide Ranking by Physical Hotspot Surface Density (2020 ↔ 2025)</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-xs font-mono font-bold text-cyan-300 bg-cyan-950/70 border border-cyan-800/80 px-3 py-1 rounded-full">
+              443,144 TOTAL HOTSPOTS
+            </span>
+            <a href="/map" class="text-xs text-cyan-400 hover:text-cyan-300 font-mono font-semibold flex items-center gap-1 transition-colors">
+              <span>View Full GIS Map</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-700/70 hover:bg-slate-800/90 hover:border-cyan-500/50 hover:shadow-xs transition-all">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="font-bold text-slate-100 flex items-center gap-1.5">
+                <span class="text-cyan-400 font-mono font-extrabold text-sm">#1</span> Karur
+              </span>
+              <span class="text-[11px] font-mono text-emerald-400 font-bold">271.1 km²</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden mb-2">
+              <div class="h-full bg-cyan-500 rounded-full" style="width: 100%;"></div>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400">35,519 change hotspots</div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-700/70 hover:bg-slate-800/90 hover:border-cyan-500/50 hover:shadow-xs transition-all">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="font-bold text-slate-100 flex items-center gap-1.5">
+                <span class="text-cyan-400 font-mono font-extrabold text-sm">#2</span> Namakkal
+              </span>
+              <span class="text-[11px] font-mono text-emerald-400 font-bold">162.4 km²</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden mb-2">
+              <div class="h-full bg-cyan-500 rounded-full" style="width: 52%;"></div>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400">18,412 change hotspots</div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-700/70 hover:bg-slate-800/90 hover:border-cyan-500/50 hover:shadow-xs transition-all">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="font-bold text-slate-100 flex items-center gap-1.5">
+                <span class="text-cyan-400 font-mono font-extrabold text-sm">#3</span> Chengalpattu
+              </span>
+              <span class="text-[11px] font-mono text-emerald-400 font-bold">138.9 km²</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden mb-2">
+              <div class="h-full bg-cyan-500 rounded-full" style="width: 42%;"></div>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400">14,820 change hotspots</div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-700/70 hover:bg-slate-800/90 hover:border-cyan-500/50 hover:shadow-xs transition-all">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="font-bold text-slate-100 flex items-center gap-1.5">
+                <span class="text-cyan-400 font-mono font-extrabold text-sm">#4</span> Coimbatore
+              </span>
+              <span class="text-[11px] font-mono text-emerald-400 font-bold">114.2 km²</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden mb-2">
+              <div class="h-full bg-cyan-500 rounded-full" style="width: 36%;"></div>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400">12,940 change hotspots</div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900/70 border border-slate-700/70 hover:bg-slate-800/90 hover:border-cyan-500/50 hover:shadow-xs transition-all">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="font-bold text-slate-100 flex items-center gap-1.5">
+                <span class="text-cyan-400 font-mono font-extrabold text-sm">#5</span> Pudukkottai
+              </span>
+              <span class="text-[11px] font-mono text-emerald-400 font-bold">98.4 km²</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden mb-2">
+              <div class="h-full bg-cyan-500 rounded-full" style="width: 33%;"></div>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400">11,850 change hotspots</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: SATELLITE PAIR UPLOADER -->
+      <section class="bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-6 lg:p-8 shadow-md">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-10 h-10 rounded-xl bg-cyan-950/70 text-cyan-400 flex items-center justify-center border border-cyan-800/80 shadow-xs">
+            <span class="material-symbols-outlined text-[22px]">upload_file</span>
+          </div>
+          <div>
+            <h4 class="font-display font-bold text-slate-100 text-base">Custom Satellite Pair Analysis</h4>
+            <p class="text-xs text-slate-400">Upload bi-temporal satellite images (T₁ earlier & T₂ later) to compute changes.</p>
+          </div>
+        </div>
+
+        <form action="/analyze" method="POST" enctype="multipart/form-data" class="space-y-5">
+          <input type="hidden" name="sample_scene" value="custom">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div onclick="document.getElementById('file_t1').click()" class="border-2 border-dashed border-slate-700 hover:border-cyan-400 rounded-xl p-6 text-center cursor-pointer transition-all bg-slate-900/60 hover:bg-slate-800/80 group">
+              <input type="file" name="file_t1" id="file_t1" accept=".png,.jpg,.jpeg,.tif,.tiff" onchange="previewUpload(this, 'preview_t1', 'info_t1')" required class="hidden">
+              <span class="material-symbols-outlined text-4xl text-slate-500 group-hover:text-cyan-400 transition-colors">image</span>
+              <div class="text-sm font-semibold text-slate-200 mt-2">T₁ Image (Earlier Date)</div>
+              <div id="info_t1" class="text-xs text-slate-400 mt-1 font-mono">Select PNG, JPG, or TIF</div>
+              <img id="preview_t1" class="mt-3 rounded-lg max-h-28 mx-auto hidden object-cover shadow-sm border border-slate-700" alt="T1 Preview">
+            </div>
+
+            <div onclick="document.getElementById('file_t2').click()" class="border-2 border-dashed border-slate-700 hover:border-cyan-400 rounded-xl p-6 text-center cursor-pointer transition-all bg-slate-900/60 hover:bg-slate-800/80 group">
+              <input type="file" name="file_t2" id="file_t2" accept=".png,.jpg,.jpeg,.tif,.tiff" onchange="previewUpload(this, 'preview_t2', 'info_t2')" required class="hidden">
+              <span class="material-symbols-outlined text-4xl text-slate-500 group-hover:text-cyan-400 transition-colors">satellite_alt</span>
+              <div class="text-sm font-semibold text-slate-200 mt-2">T₂ Image (Later Date)</div>
+              <div id="info_t2" class="text-xs text-slate-400 mt-1 font-mono">Select PNG, JPG, or TIF</div>
+              <img id="preview_t2" class="mt-3 rounded-lg max-h-28 mx-auto hidden object-cover shadow-sm border border-slate-700" alt="T2 Preview">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <span class="material-symbols-outlined text-[20px]">biotech</span>
+            <span>Execute Bi-Temporal Change Detection</span>
+          </button>
+        </form>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    function previewUpload(input, imgId, infoId) {
+      var img = document.getElementById(imgId);
+      var info = document.getElementById(infoId);
+      if (input.files && input.files[0]) {
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          img.src = e.target.result;
+          img.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+        info.innerHTML = "<strong>" + file.name + "</strong> (" + (file.size / 1024).toFixed(1) + " KB)";
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Central Application Configuration
+app:
+  name: "Semantic Satellite Change Detection System"
+  host: "127.0.0.1"
+  port: 5000
+  debug: false
+  max_upload_size_mb: 50
+  allowed_extensions: ["png", "jpg", "jpeg", "tif", "tiff"]
+
+paths:
+  dataset_path: "data/oscd"
+  model_path: "models/xgboost_change_detector.json"
+  database_path: "data/change_regions.db"
+  output_base_dir: "outputs"
+  runs_dir: "outputs/runs"
+  cache_dir: "data/explanations"
+  demo_scenes_config: "config/demo_scenes.json"
+
+inference:
+  threshold: 0.72
+  min_area_pixels: 10
+  feature_count: 32
+  use_gpu: false
+
+subsystems:
+  geospatial_enabled: true
+  explainability_enabled: true
+  search_engine_enabled: true

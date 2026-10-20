@@ -1,0 +1,542 @@
+{
+  "all": {
+    "name": "Tamil Nadu State Overview",
+    "key": "all",
+    "lat": 11.1271,
+    "lon": 78.6569,
+    "zoom": 7,
+    "tiles_count": 6499
+  },
+  "ariyalur": {
+    "name": "Ariyalur",
+    "key": "ariyalur",
+    "lat": 11.148,
+    "lon": 79.2424,
+    "zoom": 11,
+    "tiles_count": 121,
+    "bbox": [
+      78.8648,
+      10.7941,
+      79.602,
+      11.5193
+    ]
+  },
+  "chengalpattu": {
+    "name": "Chengalpattu",
+    "key": "chengalpattu",
+    "lat": 12.5668,
+    "lon": 80.0342,
+    "zoom": 11,
+    "tiles_count": 117,
+    "bbox": [
+      79.7217,
+      12.1504,
+      80.3381,
+      13.001
+    ]
+  },
+  "chennai": {
+    "name": "Chennai",
+    "key": "chennai",
+    "lat": 13.0705,
+    "lon": 80.2222,
+    "zoom": 11,
+    "tiles_count": 24,
+    "bbox": [
+      80.0733,
+      12.8689,
+      80.371,
+      13.2792
+    ]
+  },
+  "coimbatore": {
+    "name": "Coimbatore",
+    "key": "coimbatore",
+    "lat": 10.812,
+    "lon": 76.9913,
+    "zoom": 11,
+    "tiles_count": 240,
+    "bbox": [
+      76.5796,
+      10.1568,
+      77.3937,
+      11.4762
+    ]
+  },
+  "cuddalore": {
+    "name": "Cuddalore",
+    "key": "cuddalore",
+    "lat": 11.5346,
+    "lon": 79.5081,
+    "zoom": 11,
+    "tiles_count": 143,
+    "bbox": [
+      79.1285,
+      11.1068,
+      79.8876,
+      11.9711
+    ]
+  },
+  "dharmapuri": {
+    "name": "Dharmapuri",
+    "key": "dharmapuri",
+    "lat": 12.0607,
+    "lon": 78.1884,
+    "zoom": 11,
+    "tiles_count": 170,
+    "bbox": [
+      77.6124,
+      11.7206,
+      78.7451,
+      12.4007
+    ]
+  },
+  "dindigul": {
+    "name": "Dindigul",
+    "key": "dindigul",
+    "lat": 10.4028,
+    "lon": 77.7942,
+    "zoom": 11,
+    "tiles_count": 238,
+    "bbox": [
+      77.2168,
+      9.9513,
+      78.3715,
+      10.8725
+    ]
+  },
+  "erode": {
+    "name": "Erode",
+    "key": "erode",
+    "lat": 11.4697,
+    "lon": 77.4195,
+    "zoom": 11,
+    "tiles_count": 323,
+    "bbox": [
+      76.7774,
+      10.9128,
+      78.0419,
+      12.0356
+    ]
+  },
+  "kallakurichi": {
+    "name": "Kallakurichi",
+    "key": "kallakurichi",
+    "lat": 11.8242,
+    "lon": 79.023,
+    "zoom": 11,
+    "tiles_count": 156,
+    "bbox": [
+      78.5791,
+      11.4193,
+      79.4482,
+      12.229
+    ]
+  },
+  "kanchipuram": {
+    "name": "Kanchipuram",
+    "key": "kanchipuram",
+    "lat": 12.7796,
+    "lon": 79.8586,
+    "zoom": 11,
+    "tiles_count": 99,
+    "bbox": [
+      79.48,
+      12.4724,
+      80.2282,
+      13.0867
+    ]
+  },
+  "kanyakumari": {
+    "name": "Kanyakumari",
+    "key": "kanyakumari",
+    "lat": 8.3105,
+    "lon": 77.3635,
+    "zoom": 11,
+    "tiles_count": 90,
+    "bbox": [
+      77.0191,
+      8.0092,
+      77.6904,
+      8.6202
+    ]
+  },
+  "karur": {
+    "name": "Karur",
+    "key": "karur",
+    "lat": 10.7754,
+    "lon": 78.1016,
+    "zoom": 11,
+    "tiles_count": 110,
+    "bbox": [
+      77.6783,
+      10.4918,
+      78.4265,
+      11.1529
+    ]
+  },
+  "krishnagiri": {
+    "name": "Krishnagiri",
+    "key": "krishnagiri",
+    "lat": 12.5237,
+    "lon": 78.0469,
+    "zoom": 11,
+    "tiles_count": 300,
+    "bbox": [
+      77.3707,
+      12.043,
+      78.7231,
+      13.0224
+    ]
+  },
+  "madurai": {
+    "name": "Madurai",
+    "key": "madurai",
+    "lat": 9.9273,
+    "lon": 78.1221,
+    "zoom": 11,
+    "tiles_count": 156,
+    "bbox": [
+      77.6783,
+      9.5399,
+      78.5473,
+      10.3325
+    ]
+  },
+  "mayiladuthurai": {
+    "name": "Mayiladuthurai",
+    "key": "mayiladuthurai",
+    "lat": 11.1999,
+    "lon": 79.6948,
+    "zoom": 11,
+    "tiles_count": 64,
+    "bbox": [
+      79.4141,
+      10.9235,
+      79.9755,
+      11.4762
+    ]
+  },
+  "nagapattinam": {
+    "name": "Nagapattinam",
+    "key": "nagapattinam",
+    "lat": 10.6497,
+    "lon": 79.8459,
+    "zoom": 11,
+    "tiles_count": 104,
+    "bbox": [
+      79.5679,
+      10.2109,
+      80.1074,
+      11.0883
+    ]
+  },
+  "namakkal": {
+    "name": "Namakkal",
+    "key": "namakkal",
+    "lat": 11.2969,
+    "lon": 78.0453,
+    "zoom": 11,
+    "tiles_count": 154,
+    "bbox": [
+      77.5684,
+      10.9235,
+      78.5034,
+      11.67
+    ]
+  },
+  "nilgiris": {
+    "name": "Nilgiris",
+    "key": "nilgiris",
+    "lat": 11.438,
+    "lon": 76.7276,
+    "zoom": 11,
+    "tiles_count": 120,
+    "bbox": [
+      76.316,
+      11.1068,
+      77.1301,
+      11.7775
+    ]
+  },
+  "perambalur": {
+    "name": "Perambalur",
+    "key": "perambalur",
+    "lat": 11.2861,
+    "lon": 78.9247,
+    "zoom": 11,
+    "tiles_count": 60,
+    "bbox": [
+      78.5791,
+      11.0745,
+      79.2614,
+      11.4977
+    ]
+  },
+  "pudukkottai": {
+    "name": "Pudukkottai",
+    "key": "pudukkottai",
+    "lat": 10.25,
+    "lon": 78.8599,
+    "zoom": 11,
+    "tiles_count": 196,
+    "bbox": [
+      78.3814,
+      9.7782,
+      79.3383,
+      10.7214
+    ]
+  },
+  "ramanathapuram": {
+    "name": "Ramanathapuram",
+    "key": "ramanathapuram",
+    "lat": 9.4829,
+    "lon": 78.9362,
+    "zoom": 11,
+    "tiles_count": 315,
+    "bbox": [
+      78.2276,
+      8.9979,
+      79.635,
+      9.9864
+    ]
+  },
+  "ranipet": {
+    "name": "Ranipet",
+    "key": "ranipet",
+    "lat": 12.9529,
+    "lon": 79.5081,
+    "zoom": 11,
+    "tiles_count": 143,
+    "bbox": [
+      79.0625,
+      12.6011,
+      79.9536,
+      13.322
+    ]
+  },
+  "salem": {
+    "name": "Salem",
+    "key": "salem",
+    "lat": 11.6844,
+    "lon": 78.2213,
+    "zoom": 11,
+    "tiles_count": 240,
+    "bbox": [
+      77.6783,
+      11.1823,
+      78.7451,
+      12.186
+    ]
+  },
+  "sivaganga": {
+    "name": "Sivaganga",
+    "key": "sivaganga",
+    "lat": 9.9371,
+    "lon": 78.5405,
+    "zoom": 11,
+    "tiles_count": 195,
+    "bbox": [
+      78.0298,
+      9.5074,
+      79.0417,
+      10.3757
+    ]
+  },
+  "tenkasi": {
+    "name": "Tenkasi",
+    "key": "tenkasi",
+    "lat": 9.0821,
+    "lon": 77.4738,
+    "zoom": 11,
+    "tiles_count": 144,
+    "bbox": [
+      77.063,
+      8.6939,
+      77.8662,
+      9.4882
+    ]
+  },
+  "thanjavur": {
+    "name": "Thanjavur",
+    "key": "thanjavur",
+    "lat": 10.64,
+    "lon": 79.1446,
+    "zoom": 11,
+    "tiles_count": 216,
+    "bbox": [
+      78.733,
+      10.0595,
+      79.5471,
+      11.2392
+    ]
+  },
+  "theni": {
+    "name": "Theni",
+    "key": "theni",
+    "lat": 9.9255,
+    "lon": 77.4426,
+    "zoom": 11,
+    "tiles_count": 132,
+    "bbox": [
+      77.063,
+      9.5182,
+      77.8222,
+      10.3325
+    ]
+  },
+  "thoothukudi": {
+    "name": "Thoothukudi",
+    "key": "thoothukudi",
+    "lat": 8.8524,
+    "lon": 78.057,
+    "zoom": 11,
+    "tiles_count": 221,
+    "bbox": [
+      77.6124,
+      8.2811,
+      78.4924,
+      9.4232
+    ]
+  },
+  "tiruchirappalli": {
+    "name": "Tiruchirappalli",
+    "key": "tiruchirappalli",
+    "lat": 10.8124,
+    "lon": 78.6284,
+    "zoom": 11,
+    "tiles_count": 210,
+    "bbox": [
+      78.1177,
+      10.3514,
+      79.1296,
+      11.2823
+    ]
+  },
+  "tirunelveli": {
+    "name": "Tirunelveli",
+    "key": "tirunelveli",
+    "lat": 8.6255,
+    "lon": 77.6285,
+    "zoom": 11,
+    "tiles_count": 216,
+    "bbox": [
+      77.2168,
+      8.0419,
+      78.031,
+      9.228
+    ]
+  },
+  "tirupathur": {
+    "name": "Tirupathur",
+    "key": "tirupathur",
+    "lat": 12.4599,
+    "lon": 78.7258,
+    "zoom": 11,
+    "tiles_count": 110,
+    "bbox": [
+      78.3814,
+      12.1075,
+      79.0527,
+      12.8297
+    ]
+  },
+  "tiruppur": {
+    "name": "Tiruppur",
+    "key": "tiruppur",
+    "lat": 10.8343,
+    "lon": 77.4307,
+    "zoom": 11,
+    "tiles_count": 216,
+    "bbox": [
+      77.0191,
+      10.2541,
+      77.8332,
+      11.4331
+    ]
+  },
+  "tiruvallur": {
+    "name": "Tiruvallur",
+    "key": "tiruvallur",
+    "lat": 13.2525,
+    "lon": 79.9139,
+    "zoom": 11,
+    "tiles_count": 176,
+    "bbox": [
+      79.3702,
+      12.901,
+      80.4479,
+      13.6212
+    ]
+  },
+  "tiruvannamalai": {
+    "name": "Tiruvannamalai",
+    "key": "tiruvannamalai",
+    "lat": 12.4042,
+    "lon": 79.1559,
+    "zoom": 11,
+    "tiles_count": 304,
+    "bbox": [
+      78.5132,
+      11.8711,
+      79.7888,
+      12.9368
+    ]
+  },
+  "tiruvarur": {
+    "name": "Tiruvarur",
+    "key": "tiruvarur",
+    "lat": 10.6937,
+    "lon": 79.5939,
+    "zoom": 11,
+    "tiles_count": 143,
+    "bbox": [
+      79.2164,
+      10.2649,
+      79.9536,
+      11.1314
+    ]
+  },
+  "vellore": {
+    "name": "Vellore",
+    "key": "vellore",
+    "lat": 12.8117,
+    "lon": 79.023,
+    "zoom": 11,
+    "tiles_count": 130,
+    "bbox": [
+      78.5791,
+      12.4724,
+      79.4482,
+      13.1509
+    ]
+  },
+  "viluppuram": {
+    "name": "Viluppuram",
+    "key": "viluppuram",
+    "lat": 12.1252,
+    "lon": 79.5404,
+    "zoom": 11,
+    "tiles_count": 216,
+    "bbox": [
+      78.9307,
+      11.7206,
+      80.1403,
+      12.5295
+    ]
+  },
+  "virudhunagar": {
+    "name": "Virudhunagar",
+    "key": "virudhunagar",
+    "lat": 9.5032,
+    "lon": 77.8601,
+    "zoom": 11,
+    "tiles_count": 187,
+    "bbox": [
+      77.2828,
+      9.128,
+      78.4375,
+      9.8782
+    ]
+  }
+}

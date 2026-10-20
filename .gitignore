@@ -1,0 +1,46 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Datasets, Heavy Imagery & Outputs (exclude from git)
+data/
+dataset_tamilnadu_districts/
+outputs/
+sample_data/
+
+# Binary & Database formats
+*.zip
+*.tar.gz
+*.db
+*.sqlite
+*.sqlite3
+*.npy
+*.npz
+*.faiss
+*.pkl
+*.h5
+*.pth
+*.pt
+
+# Loose raster imagery in root
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+!app/static/**
+
+# OS & Temporary
+.DS_Store
+*.tmp
+.vscode/

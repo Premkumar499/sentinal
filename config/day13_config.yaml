@@ -1,0 +1,24 @@
+# Day 13 Configuration Settings
+model_settings:
+  model_path: "models/xgboost_change_detector.json"
+  model_version: "xgboost_v1.0_frozen"
+  threshold: 0.72
+  feature_list:
+    - "delta_NDVI"
+    - "delta_NDBI"
+    - "mean_spectral_diff"
+    - "max_spectral_diff"
+    - "t1_NDVI"
+    - "t2_NDVI"
+    - "t1_NDBI"
+    - "t2_NDBI"
+
+region_settings:
+  min_area_pixels: 10
+  high_confidence_score: 0.80
+  medium_confidence_score: 0.65
+
+explanation_settings:
+  use_shap: false  # Pure CPU deterministic feature importance & evidence extraction
+  cache_explanations: true
+  cache_dir: "data/explanations"

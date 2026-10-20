@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Government Environmental Audit & Threat Intelligence Report — {{ report.district }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface-canvas": "#0F172A",
+            "surface-card": "#1E293B",
+            "surface-hover": "#27354A",
+            "surface-border": "#334155",
+            "primary": "#0284C7",
+            "primary-hover": "#0369A1"
+          },
+          fontFamily: {
+            "display": ["Geist", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .report-header-banner {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-card);
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .kpi-card {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-align: center;
+      box-shadow: var(--shadow-subtle);
+    }
+    .kpi-value {
+      font-family: var(--font-heading);
+      font-size: 26px;
+      font-weight: 700;
+      color: #F8FAFC;
+      margin-top: 4px;
+    }
+    .kpi-label {
+      font-size: 11.5px;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+    .hotspot-card {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-subtle);
+    }
+    .hotspot-header {
+      padding: 12px 16px;
+      background: #0F172A;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .hotspot-body {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+    .threat-tag-critical {
+      background: rgba(239, 68, 68, 0.15);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+    .threat-tag-high {
+      background: rgba(245, 158, 11, 0.15);
+      color: #FBBF24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+    .threat-tag-moderate {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38BDF8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .threat-tag-normal {
+      background: rgba(52, 211, 153, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .checklist-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    .checklist-table th, .checklist-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #334155;
+      text-align: left;
+    }
+    .checklist-table th {
+      background: #0F172A;
+      color: #94A3B8;
+      font-weight: 600;
+    }
+
+    /* Print Stylesheet for 1-Click Official PDF Generation */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      aside, .navbar, .btn, .no-print {
+        display: none !important;
+      }
+      .ml-64 {
+        margin-left: 0 !important;
+        padding: 0 !important;
+      }
+      .app-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .report-header-banner, .kpi-card, .hotspot-card, .card {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #cccccc !important;
+        box-shadow: none !important;
+      }
+      .kpi-value, h1, h2, h3, h4 {
+        color: #000000 !important;
+      }
+      .threat-tag-critical {
+        border: 2px solid #cc0000 !important;
+        color: #cc0000 !important;
+        background: #ffe6e6 !important;
+      }
+      .threat-tag-high {
+        border: 2px solid #d9822b !important;
+        color: #d9822b !important;
+        background: #fff3e0 !important;
+      }
+      .checklist-table th, .checklist-table td {
+        border-bottom: 1px solid #cccccc !important;
+        color: #000000 !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#0F172A] text-slate-100 font-sans min-h-screen flex antialiased selection:bg-cyan-500 selection:text-white">
+  {% include 'sidebar.html' %}
+
+  <!-- Main Report Workspace -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen bg-[#0F172A] overflow-y-auto">
+
+    <!-- Top App Bar (Stitch Specification) -->
+    <header class="bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-800 h-16 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs no-print">
+      <div class="flex items-center space-x-3">
+        <span class="bg-cyan-950/70 text-cyan-300 font-mono text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-cyan-800/80 flex items-center shadow-xs">
+          <span class="material-symbols-outlined text-[14px] mr-1 text-cyan-400">verified</span>
+          ENVIRONMENTAL AUDIT & THREAT CELL
+        </span>
+        <span class="text-xs text-slate-600 font-mono hidden sm:inline">•</span>
+        <span class="text-xs text-slate-400 font-mono hidden sm:inline">{{ report.district.upper() }} JURISDICTION</span>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <a href="/reports/export-pdf?district={{ selected_district.lower() }}" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">file_download</span>
+          Download PDF
+        </a>
+        <button onclick="window.print()" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+          <span class="material-symbols-outlined text-[16px]">print</span>
+          Print Audit
+        </button>
+      </div>
+    </header>
+
+    <div class="p-6 md:p-8 max-w-7xl w-full mx-auto space-y-6">
+
+    <!-- Toolbar / District Selector (Hidden in Print) -->
+    <div class="no-print bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-4 flex justify-between items-center flex-wrap gap-4 shadow-md">
+      <div class="flex items-center gap-3">
+        <label for="report_district_select" class="text-xs font-bold text-slate-300 uppercase font-mono tracking-wider">Select District Scope:</label>
+        <select id="report_district_select" class="text-xs font-semibold bg-slate-900 border border-slate-700 text-slate-100 rounded-lg px-3 py-2 focus:outline-none focus:border-cyan-400" onchange="changeReportDistrict(this.value)">
+          {% for d in districts %}
+          <option value="{{ d.lower() }}" {% if d.lower() == selected_district.lower() %}selected{% endif %}>
+            🏛️ {{ d }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="text-xs text-slate-400 font-mono">
+        Official Sentinel-2 Multi-Temporal Spatial Inquest
+      </div>
+    </div>
+
+    <!-- MAIN PRINTABLE REPORT CONTAINER -->
+    <div id="printable_report">
+      <!-- Official Government Header -->
+      <section class="report-header-banner">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+              <span style="font-size: 28px;">🏛️</span>
+              <div>
+                <h2 style="font-family: var(--font-heading); font-size: 22px; color: #F8FAFC; line-height: 1.2; font-weight: 700;">
+                  GOVERNMENT OF TAMIL NADU
+                </h2>
+                <p style="font-size: 13px; color: #94A3B8; font-weight: 500;">
+                  State Remote Sensing & Urban Land-Cover Intelligence Cell • Environmental Audit Report
+                </p>
+              </div>
+            </div>
+            <p style="font-size: 14px; margin-top: 10px; color: #38BDF8; font-weight: 600; font-family: var(--font-mono);">
+              SURVEY DISTRICT EXTENT: {{ report.district.upper() }}
+            </p>
+          </div>
+
+          <div style="text-align: right; font-family: var(--font-mono); font-size: 11px; color: #94A3B8; line-height: 1.6;">
+            <div>Report Ref: <strong style="color: #F8FAFC;">TN-ENV-{{ report.district[:3].upper() }}-2026</strong></div>
+            <div>Generated: <strong style="color: #F8FAFC;">{{ report.metadata.generated_at }}</strong></div>
+            <div>Satellite Sensor: <strong style="color: #F8FAFC;">Sentinel-2 (10m GSD)</strong></div>
+            <div>Classification Engine: <strong style="color: #F8FAFC;">XGBoost + Spectral Rules</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Executive KPI Dashboard -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Detected Change Regions</div>
+          <div class="kpi-value" style="color: #38BDF8;">{{ report.summary.total_detected_regions }}</div>
+          <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Bounded Contours</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Total Ground Changed</div>
+          <div class="kpi-value" style="color: #FBBF24;">{{ report.summary.total_changed_hectares }} ha</div>
+          <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">{{ '{:,.0f}'.format(report.summary.total_changed_m2) }} m²</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">District Threat Index</div>
+          <div class="kpi-value" style="color: {% if report.summary.threat_score >= 60 %}#F87171{% elif report.summary.threat_score >= 30 %}#FBBF24{% else %}#34D399{% endif %};">
+            {{ report.summary.threat_score }} / 100
+          </div>
+          <div style="font-size: 11px; font-weight: 700; color: {% if report.summary.threat_score >= 60 %}#F87171{% elif report.summary.threat_score >= 30 %}#FBBF24{% else %}#34D399{% endif %};">
+            {{ report.summary.risk_rating }}
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Critical Lakebed Alerts</div>
+          <div class="kpi-value" style="color: #F87171;">{{ report.summary.critical_encroachments_count }}</div>
+          <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Water to Built/Bare</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Forest / Green Depletion</div>
+          <div class="kpi-value" style="color: #FBBF24;">{{ report.summary.high_ecological_alerts_count }}</div>
+          <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Canopy Loss &gt; 2,500 m²</div>
+        </div>
+      </div>
+
+      <!-- Class Breakdown Distribution -->
+      <section class="card" style="padding: 20px; margin-bottom: 24px; background: #1E293B; border: 1px solid #334155;">
+        <h3 style="font-size: 16px; margin-bottom: 14px; font-family: var(--font-heading); color: #F8FAFC; font-weight: 700;">
+          📊 Land-Cover Physical Change Distribution (With District Share %)
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+          <div style="padding: 14px; background: rgba(2, 132, 199, 0.14); border-left: 4px solid #38BDF8; border-radius: 6px;">
+            <div style="font-size: 11px; color: #38BDF8; font-weight: 600; font-family: var(--font-mono);">WATER LOSS / TRANSITION</div>
+            <div style="font-size: 20px; font-weight: 700; color: #38BDF8; margin: 4px 0 2px 0;">{{ report.class_breakdown.water.hectares }} ha</div>
+            <div style="font-size: 12px; font-weight: 600; color: #38BDF8; margin: 2px 0;">{{ report.class_breakdown.water.percentage_of_total_change or 0.0 }}% of total change</div>
+            <div style="font-size: 11px; color: #94A3B8;">{{ report.class_breakdown.water.count }} regions ({{ '{:,.0f}'.format(report.class_breakdown.water.area_m2) }} m²)</div>
+          </div>
+
+          <div style="padding: 14px; background: rgba(16, 185, 129, 0.14); border-left: 4px solid #34D399; border-radius: 6px;">
+            <div style="font-size: 11px; color: #34D399; font-weight: 600; font-family: var(--font-mono);">VEGETATION DYNAMICS</div>
+            <div style="font-size: 20px; font-weight: 700; color: #34D399; margin: 4px 0 2px 0;">{{ report.class_breakdown.vegetation.hectares }} ha</div>
+            <div style="font-size: 12px; font-weight: 600; color: #34D399; margin: 2px 0;">{{ report.class_breakdown.vegetation.percentage_of_total_change or 0.0 }}% of total change</div>
+            <div style="font-size: 11px; color: #94A3B8;">{{ report.class_breakdown.vegetation.count }} regions ({{ '{:,.0f}'.format(report.class_breakdown.vegetation.area_m2) }} m²)</div>
+          </div>
+
+          <div style="padding: 14px; background: rgba(239, 68, 68, 0.14); border-left: 4px solid #F87171; border-radius: 6px;">
+            <div style="font-size: 11px; color: #F87171; font-weight: 600; font-family: var(--font-mono);">BUILT-UP EXPANSION</div>
+            <div style="font-size: 20px; font-weight: 700; color: #F87171; margin: 4px 0 2px 0;">{{ report.class_breakdown.building.hectares }} ha</div>
+            <div style="font-size: 12px; font-weight: 600; color: #F87171; margin: 2px 0;">{{ report.class_breakdown.building.percentage_of_total_change or 0.0 }}% of total change</div>
+            <div style="font-size: 11px; color: #94A3B8;">{{ report.class_breakdown.building.count }} regions ({{ '{:,.0f}'.format(report.class_breakdown.building.area_m2) }} m²)</div>
+          </div>
+
+          <div style="padding: 14px; background: rgba(245, 158, 11, 0.14); border-left: 4px solid #FBBF24; border-radius: 6px;">
+            <div style="font-size: 11px; color: #FBBF24; font-weight: 600; font-family: var(--font-mono);">BARE LAND EXCAVATION</div>
+            <div style="font-size: 20px; font-weight: 700; color: #FBBF24; margin: 4px 0 2px 0;">{{ report.class_breakdown.bare_land.hectares }} ha</div>
+            <div style="font-size: 12px; font-weight: 600; color: #FBBF24; margin: 2px 0;">{{ report.class_breakdown.bare_land.percentage_of_total_change or 0.0 }}% of total change</div>
+            <div style="font-size: 11px; color: #94A3B8;">{{ report.class_breakdown.bare_land.count }} regions ({{ '{:,.0f}'.format(report.class_breakdown.bare_land.area_m2) }} m²)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Priority Hotspots with Satellite Evidence -->
+      <section style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h3 style="font-size: 18px; font-family: var(--font-heading); color: #F8FAFC; font-weight: 700;">
+            🚨 Top Priority Environmental Threat Hotspots
+          </h3>
+          <span style="font-size: 12px; color: #94A3B8; font-mono">Ranked by Encroachment Threat & Physical Area</span>
+        </div>
+
+        {% if report.priority_hotspots %}
+          {% for h in report.priority_hotspots[:5] %}
+          <div class="hotspot-card">
+            <div class="hotspot-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: 700; font-size: 14px; color: #F8FAFC;">#{{ h.priority_rank }} — Region {{ h.region_id }} ({{ h.district }})</span>
+                {% if h.threat_level == 'CRITICAL' %}
+                  <span class="threat-tag-critical">{{ h.threat_badge }}</span>
+                {% elif h.threat_level == 'HIGH' %}
+                  <span class="threat-tag-high">{{ h.threat_badge }}</span>
+                {% elif h.threat_level == 'MODERATE' %}
+                  <span class="threat-tag-moderate">{{ h.threat_badge }}</span>
+                {% else %}
+                  <span class="threat-tag-normal">{{ h.threat_badge }}</span>
+                {% endif %}
+              </div>
+              <div style="font-size: 12px; font-family: var(--font-mono); color: #94A3B8;">
+                GPS: {{ h.lat }}° N, {{ h.lon }}° E
+              </div>
+            </div>
+
+            <div class="hotspot-body">
+              <div style="border: 1px solid #334155; border-radius: 6px; overflow: hidden; background: #0B132B;">
+                <img src="{{ h.crop_url }}" alt="4-Panel Satellite Evidence" style="width: 100%; height: auto; display: block;" onerror="this.src='/static/generated/overlay_fallback.png'">
+                <div style="font-size: 10px; color: #94A3B8; text-align: center; padding: 4px; font-family: var(--font-mono); background: #0F172A;">
+                  T1 • T2 • Change • Semantic
+                </div>
+              </div>
+
+              <div>
+                <p style="font-size: 13px; font-weight: 600; color: #F8FAFC; margin-bottom: 8px;">
+                  ⚠️ {{ h.threat_reason }}
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 12px; color: #CBD5E1;">
+                  <div>Ground Area: <strong style="color: #F8FAFC;">{{ '{:,.1f}'.format(h.area_m2) }} m² ({{ h.area_hectares }} ha)</strong></div>
+                  <div>District Share: <strong style="color: #38BDF8;">{% if h.percentage_of_district_change < 0.01 and h.area_m2 > 0 %}&lt;0.01%{% else %}{{ h.percentage_of_district_change }}%{% endif %}</strong></div>
+                  <div>Transition: <strong style="color: #F8FAFC;">{{ h.t1_class.upper() }} ➔ {{ h.t2_class.upper() }}</strong></div>
+                  <div>Confidence Score: <strong style="color: #34D399;">{{ h.confidence_percentage }}%</strong></div>
+                  <div>Assigned Action Unit: <strong style="color: #F8FAFC;">{{ h.department }}</strong></div>
+                </div>
+                <div class="no-print" style="margin-top: 8px;">
+                  <a href="{{ h.deep_link }}" class="btn btn-secondary btn-sm" style="font-size: 11px; text-decoration: none;">
+                    🔍 Open Full Pixel Contours & Deep AI Explanation
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="card" style="text-align: center; padding: 40px; color: #94A3B8;">
+            No severe threat hotspots detected for this district extent.
+          </div>
+        {% endif %}
+      </section>
+
+      <!-- Section: Ground Officer Field Inspection Checklist -->
+      <section class="card page-break" style="padding: 20px; margin-bottom: 24px; background: #1E293B; border: 1px solid #334155;">
+        <h3 style="font-size: 16px; margin-bottom: 8px; font-family: var(--font-heading); color: #F8FAFC; font-weight: 700;">
+          📋 Actionable Field Verification Checklist (For Ground Revenue & Forest Teams)
+        </h3>
+        <p style="font-size: 12px; color: #94A3B8; margin-bottom: 14px;">
+          Mandatory on-ground verification targets. Field officers must cross-reference land deeds and local permits against the remote sensing coordinates below.
+        </p>
+
+        <table class="checklist-table">
+          <thead>
+            <tr>
+              <th style="width: 70px;">Status</th>
+              <th>Target ID</th>
+              <th>Target GPS Coordinates</th>
+              <th>Ground Area</th>
+              <th>Threat Classification</th>
+              <th>Designated Action Unit</th>
+              <th>Mandate / Action Required</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in report.field_checklist %}
+            <tr>
+              <td style="text-align: center;">
+                <input type="checkbox" style="width: 16px; height: 16px; cursor: pointer; accent-color: #0284C7;">
+              </td>
+              <td><strong style="color: #F8FAFC;">#{{ item.item_no }} (R{{ item.region_id }})</strong></td>
+              <td style="font-family: var(--font-mono); font-size: 11px; color: #94A3B8;">{{ item.target_location }}</td>
+              <td style="color: #34D399; font-weight: 600;">{{ item.area_m2 }}</td>
+              <td><span style="font-size: 11px; font-weight: 600;">{{ item.threat_badge }}</span></td>
+              <td style="font-size: 11px; color: #94A3B8;">{{ item.assigned_department }}</td>
+              <td style="font-size: 11px; color: #CBD5E1;">{{ item.inspection_mandate }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Official Sign-off Footer -->
+      <section style="display: flex; justify-content: space-between; align-items: flex-end; padding: 24px 10px; border-top: 1px solid #334155; margin-top: 30px; font-size: 12px; color: #94A3B8;">
+        <div>
+          <div>Automated Intelligence Engine: <strong style="color: #F8FAFC;">Semantic Satellite Change Detection v1.0</strong></div>
+          <div>Confidence Threshold: <strong style="color: #F8FAFC;">XGBoost Probability = 0.72 • 100% CPU Compatible</strong></div>
+        </div>
+        <div style="text-align: right;">
+          <div style="border-top: 1px solid #475569; width: 200px; margin-bottom: 6px; display: inline-block;"></div>
+          <div style="color: #94A3B8; font-weight: 500;">District Collector / Authorizing Officer Sign-off</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    function changeReportDistrict(dist) {
+      window.location.href = `/reports?district=${encodeURIComponent(dist)}`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Final System Release Metadata & System Lock
+release_metadata:
+  system_name: "Semantic Satellite Change Detection System"
+  version: "1.0.0-final"
+  release_date: "2026-09-01"
+  model_version: "xgboost_v1.0_frozen"
+  feature_version: "v3_32features"
+  semantic_version: "v1.0_spectral_rules"
+  dataset_version: "OSCD_Sentinel2_v1"
+  threshold: 0.72
+  random_seed: 42
+  hardware_requirement: "CPU Only"

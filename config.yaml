@@ -1,0 +1,54 @@
+# Project Configuration for Semantic Change Detection System
+
+dataset:
+  raw_dir: "data/oscd100"
+  images_subdir: "Onera Satellite Change Detection dataset - Images"
+  train_labels_subdir: "Onera Satellite Change Detection dataset - Train Labels"
+  test_labels_subdir: "Onera Satellite Change Detection dataset - Test Labels"
+  val_labels_subdir: "Onera Satellite Change Detection dataset - Val Labels"
+  processed_dir: "data/processed"
+
+band_mapping:
+  blue: "B02"
+  green: "B03"
+  red: "B04"
+  nir: "B08"
+  swir: "B11"
+
+preprocessing:
+  reflectance_scale: 10000.0
+  nan_fill_value: 0.0
+
+features:
+  feature_names:
+    - "R_T1"
+    - "G_T1"
+    - "B_T1"
+    - "R_T2"
+    - "G_T2"
+    - "B_T2"
+    - "R_diff"
+    - "G_diff"
+    - "B_diff"
+    - "NDVI_T1"
+    - "NDVI_T2"
+    - "NDVI_diff"
+    - "NDBI_T1"
+    - "NDBI_T2"
+    - "NDBI_diff"
+    - "RGB_diff_mag"
+
+outputs:
+  dir: "outputs"
+  visualizations_dir: "outputs/visualizations"
+  models_dir: "models"
+
+groq:
+  api_key: ""
+  model: "qwen/qwen3.8-27b"
+  fallback_models:
+    - "openai/gpt-oss-120b"
+    - "openai/gpt-oss-20b"
+  temperature: 0.2
+  max_tokens: 1024
+

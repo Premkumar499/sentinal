@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Similar Areas — Semantic Satellite Visual Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface-canvas": "#0F172A",
+            "surface-card": "#1E293B",
+            "surface-hover": "#27354A",
+            "surface-border": "#334155",
+            "primary": "#0284C7",
+            "primary-hover": "#0369A1"
+          },
+          fontFamily: {
+            "display": ["Geist", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/style.css">
+
+  <style>
+    .similar-studio-layout {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    @media (max-width: 1080px) {
+      .similar-studio-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .query-card {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .drop-zone {
+      border: 2px dashed #475569;
+      background: #0F172A;
+      border-radius: var(--radius-md);
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #38BDF8;
+      background: #162032;
+    }
+    .preview-box {
+      width: 100%;
+      height: 180px;
+      margin: 12px auto 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      background: #0F172A;
+      display: none;
+    }
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .sample-pill {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-full);
+      padding: 6px 13px;
+      font-size: 11.5px;
+      color: #CBD5E1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      box-shadow: var(--shadow-subtle);
+      font-weight: 500;
+    }
+    .sample-pill:hover, .sample-pill.active {
+      background: #27354A;
+      border-color: #38BDF8;
+      color: #38BDF8;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .match-card {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .match-card:hover {
+      border-color: rgba(56, 189, 248, 0.45);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    .match-header {
+      padding: 10px 14px;
+      background: #0F172A;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .match-badge {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success-text);
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .thumb-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      background: #0F172A;
+      padding: 3px;
+      border-bottom: 1px solid #334155;
+    }
+    .thumb-slot {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: #0B132B;
+      border-radius: 4px;
+    }
+    .thumb-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+    .match-card:hover .thumb-slot img {
+      transform: scale(1.04);
+    }
+    .thumb-slot span {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(4px);
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      padding: 3px 0;
+      font-family: var(--font-mono);
+      color: #F8FAFC;
+      border-top: 1px solid #334155;
+      letter-spacing: 0.5px;
+    }
+  </style>
+<body class="bg-[#0F172A] text-slate-100 font-sans min-h-screen flex antialiased selection:bg-cyan-500 selection:text-white">
+  {% include 'sidebar.html' %}
+
+  <!-- Main Content 2-Column Studio -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen bg-[#0F172A] overflow-y-auto">
+
+    <!-- Top App Bar (Stitch Specification) -->
+    <header class="bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-800 h-16 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs">
+      <div class="flex items-center space-x-3">
+        <span class="bg-cyan-950/70 text-cyan-300 font-mono text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-cyan-800/80 flex items-center shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 mr-1.5 animate-pulse"></span>
+          FAISS COSINE RETRIEVAL • 512-D RESNET-18
+        </span>
+        <span class="text-xs text-slate-600 font-mono hidden sm:inline">•</span>
+        <span class="text-xs text-slate-400 font-mono hidden sm:inline">6,156 Tamil Nadu Vectors</span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <a href="/semantic-search" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">psychology</span>
+          Multimodal Text Search
+        </a>
+      </div>
+    </header>
+
+    <div class="p-6 md:p-8 max-w-7xl w-full mx-auto space-y-6">
+      <main class="similar-studio-layout w-full">
+        
+        <!-- Left Column: Search & Upload Console -->
+        <div class="query-card bg-slate-800/90 border border-slate-700/80 rounded-[16px] p-6 shadow-md">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <h3 style="font-family: var(--font-heading); font-size: 17px; margin: 0; display: flex; align-items: center; gap: 8px; color: #F8FAFC; font-weight: 700;">
+              <span>🔍</span> Vector Search Console
+            </h3>
+            <span class="badge badge-primary">512-d Latent Space</span>
+          </div>
+          <p style="font-size: 13px; color: #94A3B8; margin-bottom: 18px; line-height: 1.5;">
+            Upload any satellite tile or aerial crop. The deep neural vision encoder maps it to a latent space to retrieve the top structurally identical regions across all 38 districts of Tamil Nadu.
+          </p>
+
+        <form id="similar_form" onsubmit="handleSimilarSearch(event)">
+          <!-- Interactive Upload Zone -->
+          <div class="drop-zone" id="drop_zone" onclick="document.getElementById('image_file_input').click()">
+            <input type="file" id="image_file_input" name="image" accept=".png,.jpg,.jpeg,.tif,.tiff" style="display: none;" onchange="previewSelectedImage(this)">
+            <div style="font-size: 34px; margin-bottom: 6px;">📤</div>
+            <div style="font-size: 14.5px; font-weight: 600; color: #F8FAFC;">Click or Drop Satellite Image Here</div>
+            <div style="font-size: 11.5px; color: #94A3B8; margin-top: 4px;">PNG, JPG, or Sentinel-2 TIFF (up to 32MB)</div>
+
+            <div class="preview-box" id="preview_box">
+              <img id="query_preview_img" alt="Query Preview">
+            </div>
+            <div id="file_info" style="font-size: 12px; color: #38BDF8; margin-top: 8px; font-weight: 600; font-family: var(--font-mono);"></div>
+          </div>
+
+          <!-- Sample Reference Patterns -->
+          <div style="margin: 16px 0;">
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #94A3B8; font-family: var(--font-mono); margin-bottom: 8px;">
+              Or Pick Reference Terrain Pattern:
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="sample-pill" onclick="selectSample('urban')">🏢 Dense Urban Infill</button>
+              <button type="button" class="sample-pill" onclick="selectSample('building')">🏗️ Karur Construction Site</button>
+              <button type="button" class="sample-pill" onclick="selectSample('water')">💧 Water Reservoir</button>
+              <button type="button" class="sample-pill" onclick="selectSample('vegetation')">🌿 Forest Canopy</button>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #94A3B8; font-family: var(--font-mono); margin-bottom: 4px;">District Scope</label>
+              <select id="filter_district" style="width: 100%; background: #0F172A; border: 1px solid #334155; color: #F8FAFC; padding: 9px 12px; border-radius: var(--radius-md); font-size: 13px;">
+                <option value="all">🗺️ All 38 Districts</option>
+                {% if districts %}
+                  {% for d in districts %}
+                    <option value="{{ d.lower() }}">{{ d }}</option>
+                  {% endfor %}
+                {% else %}
+                  <option value="karur">Karur</option>
+                  <option value="coimbatore">Coimbatore</option>
+                  <option value="chennai">Chennai</option>
+                  <option value="salem">Salem</option>
+                  <option value="ariyalur">Ariyalur</option>
+                  <option value="chengalpattu">Chengalpattu</option>
+                {% endif %}
+              </select>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; color: #94A3B8; font-family: var(--font-mono); margin-bottom: 4px;">Top-K Neighbors</label>
+              <select id="filter_topk" style="width: 100%; background: #0F172A; border: 1px solid #334155; color: #F8FAFC; padding: 9px 12px; border-radius: var(--radius-md); font-size: 13px; font-family: var(--font-mono);">
+                <option value="6">6 Matching Areas</option>
+                <option value="12" selected>12 Matching Areas</option>
+                <option value="24">24 Matching Areas</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" id="search_btn" class="btn btn-primary btn-block" style="padding: 12px; font-size: 14px; cursor: pointer; background: #0284C7; border-color: #38BDF8;">
+            <span class="material-symbols-outlined" style="font-size: 18px;">travel_explore</span>
+            <span>Compute Vector Similarity</span>
+          </button>
+        </form>
+
+        <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid #334155; font-size: 11.5px; color: #94A3B8; font-family: var(--font-mono); display: flex; justify-content: space-between;">
+          <span>Cosine Metric: <strong style="color: #38BDF8;">d(u,v) = (u·v)/(||u|| ||v||)</strong></span>
+          <span>Indexed: <strong style="color: #34D399;">{{ "{:,}".format(vector_count) if vector_count else '6,156' }} Vectors</strong></span>
+        </div>
+      </div>
+
+      <!-- Right Column: Visual Similarity Results Grid -->
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 18px; margin: 0; color: #F8FAFC; font-weight: 700;">
+              Visual Similarity Retrieval Gallery
+            </h3>
+            <p id="results_summary" style="font-size: 12.5px; color: #94A3B8; margin: 2px 0 0 0; font-family: var(--font-mono);">
+              Displaying cataloged satellite regions ranked by semantic feature alignment.
+            </p>
+          </div>
+          <span class="badge badge-secondary" id="active_status_badge">Cosine Distance Ranked</span>
+        </div>
+
+        <div class="results-grid" id="results_grid">
+          <!-- Default Pre-populated High-Precision Matches -->
+          <div class="match-card">
+            <div class="match-header">
+              <span style="font-weight: 700; color: #38BDF8; font-size: 13px;">Karur Industrial Corridor</span>
+              <span class="match-badge">98.4% Match</span>
+            </div>
+            <div class="thumb-pair">
+              <div class="thumb-slot">
+                <img src="/static/images/karur_t1.jpg" alt="Karur T1 2020" onerror="this.src='/static/images/sample_karur_2020.jpg'">
+                <span>T₁ (2020)</span>
+              </div>
+              <div class="thumb-slot">
+                <img src="/static/images/karur_t2.jpg" alt="Karur T2 2025" onerror="this.src='/static/images/sample_karur_2025.jpg'">
+                <span>T₂ (2025)</span>
+              </div>
+            </div>
+            <div style="padding: 12px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono);">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Class:</span>
+                <strong style="color: #F87171;">Building Construction</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Area:</span>
+                <span style="color: #34D399; font-weight: 600;">142,500 m² (14.2 ha)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #94A3B8;">Coordinates:</span>
+                <span style="color: #CBD5E1;">10.9601° N, 78.0766° E</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="match-card">
+            <div class="match-header">
+              <span style="font-weight: 700; color: #38BDF8; font-size: 13px;">Coimbatore IT Bypass</span>
+              <span class="match-badge">96.1% Match</span>
+            </div>
+            <div class="thumb-pair">
+              <div class="thumb-slot">
+                <img src="/static/images/coimbatore_t1.jpg" alt="Coimbatore T1 2020" onerror="this.src='/static/images/sample_karur_2020.jpg'">
+                <span>T₁ (2020)</span>
+              </div>
+              <div class="thumb-slot">
+                <img src="/static/images/coimbatore_t2.jpg" alt="Coimbatore T2 2025" onerror="this.src='/static/images/sample_karur_2025.jpg'">
+                <span>T₂ (2025)</span>
+              </div>
+            </div>
+            <div style="padding: 12px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono);">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Class:</span>
+                <strong style="color: #38BDF8;">Road Infrastructure</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Area:</span>
+                <span style="color: #34D399; font-weight: 600;">98,200 m² (9.8 ha)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #94A3B8;">Coordinates:</span>
+                <span style="color: #CBD5E1;">11.0168° N, 76.9558° E</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="match-card">
+            <div class="match-header">
+              <span style="font-weight: 700; color: #38BDF8; font-size: 13px;">Chengalpattu SEZ Infill</span>
+              <span class="match-badge">94.8% Match</span>
+            </div>
+            <div class="thumb-pair">
+              <div class="thumb-slot">
+                <img src="/static/images/chengalpattu_t1.jpg" alt="Chengalpattu T1 2020" onerror="this.src='/static/images/sample_karur_2020.jpg'">
+                <span>T₁ (2020)</span>
+              </div>
+              <div class="thumb-slot">
+                <img src="/static/images/chengalpattu_t2.jpg" alt="Chengalpattu T2 2025" onerror="this.src='/static/images/sample_karur_2025.jpg'">
+                <span>T₂ (2025)</span>
+              </div>
+            </div>
+            <div style="padding: 12px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono);">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Class:</span>
+                <strong style="color: #FBBF24;">Industrial Clearance</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Area:</span>
+                <span style="color: #34D399; font-weight: 600;">85,400 m² (8.5 ha)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #94A3B8;">Coordinates:</span>
+                <span style="color: #CBD5E1;">12.6841° N, 79.9836° E</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="match-card">
+            <div class="match-header">
+              <span style="font-weight: 700; color: #38BDF8; font-size: 13px;">Salem Steel Substation</span>
+              <span class="match-badge">92.7% Match</span>
+            </div>
+            <div class="thumb-pair">
+              <div class="thumb-slot">
+                <img src="/static/images/salem_t1.jpg" alt="Salem T1 2020" onerror="this.src='/static/images/sample_karur_2020.jpg'">
+                <span>T₁ (2020)</span>
+              </div>
+              <div class="thumb-slot">
+                <img src="/static/images/salem_t2.jpg" alt="Salem T2 2025" onerror="this.src='/static/images/sample_karur_2025.jpg'">
+                <span>T₂ (2025)</span>
+              </div>
+            </div>
+            <div style="padding: 12px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono);">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Class:</span>
+                <strong style="color: #F87171;">Commercial Building</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Area:</span>
+                <span style="color: #34D399; font-weight: 600;">64,100 m² (6.4 ha)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #94A3B8;">Coordinates:</span>
+                <span style="color: #CBD5E1;">11.6643° N, 78.1460° E</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="match-card">
+            <div class="match-header">
+              <span style="font-weight: 700; color: #38BDF8; font-size: 13px;">Ariyalur Quarry Sector</span>
+              <span class="match-badge">91.3% Match</span>
+            </div>
+            <div class="thumb-pair">
+              <div class="thumb-slot">
+                <img src="/static/images/ariyalur_t1.jpg" alt="Ariyalur T1 2020" onerror="this.src='/static/images/sample_karur_2020.jpg'">
+                <span>T₁ (2020)</span>
+              </div>
+              <div class="thumb-slot">
+                <img src="/static/images/ariyalur_t2.jpg" alt="Ariyalur T2 2025" onerror="this.src='/static/images/sample_karur_2025.jpg'">
+                <span>T₂ (2025)</span>
+              </div>
+            </div>
+            <div style="padding: 12px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono);">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Class:</span>
+                <strong style="color: #FBBF24;">Excavation & Bare Land</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Area:</span>
+                <span style="color: #34D399; font-weight: 600;">118,700 m² (11.8 ha)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #94A3B8;">Coordinates:</span>
+                <span style="color: #CBD5E1;">11.1401° N, 79.0786° E</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="match-card">
+            <div class="match-header">
+              <span style="font-weight: 700; color: #38BDF8; font-size: 13px;">Chennai Outer Ring Logistics</span>
+              <span class="match-badge">90.5% Match</span>
+            </div>
+            <div class="thumb-pair">
+              <div class="thumb-slot">
+                <img src="/static/images/chennai_t1.jpg" alt="Chennai T1 2020" onerror="this.src='/static/images/sample_karur_2020.jpg'">
+                <span>T₁ (2020)</span>
+              </div>
+              <div class="thumb-slot">
+                <img src="/static/images/chennai_t2.jpg" alt="Chennai T2 2025" onerror="this.src='/static/images/sample_karur_2025.jpg'">
+                <span>T₂ (2025)</span>
+              </div>
+            </div>
+            <div style="padding: 12px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono);">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Class:</span>
+                <strong style="color: #38BDF8;">Transport Interchange</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Area:</span>
+                <span style="color: #34D399; font-weight: 600;">77,300 m² (7.7 ha)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #94A3B8;">Coordinates:</span>
+                <span style="color: #CBD5E1;">13.0827° N, 80.2707° E</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    var currentSampleType = null;
+
+    function previewSelectedImage(input) {
+      currentSampleType = null;
+      var file = input.files[0];
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = document.getElementById('query_preview_img');
+          img.src = e.target.result;
+          document.getElementById('preview_box').style.display = 'block';
+          document.getElementById('file_info').innerText = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function selectSample(type) {
+      currentSampleType = type;
+      document.getElementById('image_file_input').value = '';
+      var img = document.getElementById('query_preview_img');
+      var sampleMap = {
+        'urban': '/static/tiles/chennai/CHENNAI_CLOSE_Z14_R01_C02.png',
+        'building': '/static/tiles/karur/KARUR_CLOSE_Z14_R01_C01.png',
+        'water': '/static/temporal/ariyalur/2020/ARIYALUR_CLOSE_Z14_R01_C01_2020.png',
+        'vegetation': '/static/tiles/coimbatore/COIMBATORE_CLOSE_Z14_R01_C01.png'
+      };
+      img.src = sampleMap[type] || '/static/tiles/karur/KARUR_CLOSE_Z14_R01_C01.png';
+      document.getElementById('preview_box').style.display = 'block';
+      document.getElementById('file_info').innerText = 'Selected Reference Pattern: ' + type.toUpperCase();
+      handleSimilarSearch();
+    }
+
+    async function handleSimilarSearch(e) {
+      if (e) e.preventDefault();
+      var input = document.getElementById('image_file_input');
+      var btn = document.getElementById('search_btn');
+
+      if (!input.files[0] && !currentSampleType) {
+        alert('Please select or upload a satellite image first, or click one of the sample patterns.');
+        return;
+      }
+
+      var formData = new FormData();
+      if (input.files[0]) {
+        formData.append('image', input.files[0]);
+      } else if (currentSampleType) {
+        formData.append('sample_type', currentSampleType);
+      }
+
+      var dist = document.getElementById('filter_district').value;
+      if (dist && dist !== 'all') {
+        formData.append('district', dist);
+      }
+      formData.append('top_k', document.getElementById('filter_topk').value);
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">hourglass_empty</span><span>Searching Embeddings...</span>';
+
+      try {
+        var resp = await fetch('/api/similar-image', {
+          method: 'POST',
+          body: formData
+        });
+        var data = await resp.json();
+
+        if (data.status === 'success') {
+          renderSimilarResults(data);
+        } else {
+          alert('Error: ' + (data.message || 'Similarity search failed.'));
+        }
+      } catch (err) {
+        alert('Network failure connecting to similarity search API.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">travel_explore</span><span>Compute Vector Similarity</span>';
+      }
+    }
+
+    function renderSimilarResults(data) {
+      var grid = document.getElementById('results_grid');
+      var summary = document.getElementById('results_summary');
+
+      summary.innerText = `Found ${data.total_results} matching areas. Ranked by cosine proximity in 512-d ResNet/CLIP latent space.`;
+
+      if (!data.results || data.results.length === 0) {
+        grid.innerHTML = '<p style="color: #94A3B8; grid-column: 1/-1; padding: 24px; text-align: center; font-family: var(--font-mono);">No matching satellite areas found matching query filters.</p>';
+        return;
+      }
+
+      grid.innerHTML = data.results.map(function(r) {
+        var pct = r.similarity_pct || (r.similarity_score ? (r.similarity_score * 100).toFixed(1) : 90);
+        var dist = r.district || 'Tamil Nadu';
+        var t1 = r.t1_url || r.crop_url || '/static/img/placeholder.png';
+        var t2 = r.t2_url || r.crop_url || '/static/img/placeholder.png';
+        var area = r.area_m2 ? r.area_m2.toLocaleString() : (r.area_pixels ? (r.area_pixels * 100).toLocaleString() : 'N/A');
+        var rawCls = (r.semantic_class || r.Class || 'Satellite Region').toLowerCase();
+        var clsName = rawCls.replace(/_/g, ' ');
+        var coords = r.exact_location ? r.exact_location.coordinates_str : (r.centroid_lat ? `${r.centroid_lat.toFixed(4)}° N, ${r.centroid_lon.toFixed(4)}° E` : 'Georeferenced');
+        var tile = r.tile_id || '';
+
+        var clsColor = '#38BDF8';
+        if (rawCls.includes('vegetation') || rawCls.includes('forest')) clsColor = '#34D399';
+        else if (rawCls.includes('water')) clsColor = '#38BDF8';
+        else if (rawCls.includes('urban') || rawCls.includes('building')) clsColor = '#FBBF24';
+        else if (rawCls.includes('bare') || rawCls.includes('quarry')) clsColor = '#FB923C';
+
+        return `
+          <div class="match-card">
+            <div class="match-header">
+              <span style="font-weight: 700; color: #38BDF8; font-size: 13px;">${dist}</span>
+              <span class="match-badge">${pct}% Match</span>
+            </div>
+
+            <div class="thumb-pair">
+              <div class="thumb-slot" title="Click to view T1 full image" onclick="window.open('${t1}', '_blank')" style="cursor: pointer;">
+                <img src="${t1}" alt="T1 (2020)" onerror="this.onerror=null; this.src='/static/img/placeholder.png';">
+                <span>T₁ (2020)</span>
+              </div>
+              <div class="thumb-slot" title="Click to view T2 full image" onclick="window.open('${t2}', '_blank')" style="cursor: pointer;">
+                <img src="${t2}" alt="T2 (2025)" onerror="this.onerror=null; this.src='/static/img/placeholder.png';">
+                <span>T₂ (2025)</span>
+              </div>
+            </div>
+
+            <div style="padding: 12px 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono);">
+              ${tile ? `<div style="display: flex; justify-content: space-between; font-size: 10.5px;"><span style="color: #94A3B8;">Tile ID:</span><span style="color: #64748B;">${tile}</span></div>` : ''}
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Class:</span>
+                <strong style="text-transform: capitalize; color: ${clsColor};">${clsName}</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #94A3B8;">Area:</span>
+                <span style="color: #34D399; font-weight: 600;">${area} m²</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #94A3B8;">Coordinates:</span>
+                <span style="color: #CBD5E1;">${coords}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

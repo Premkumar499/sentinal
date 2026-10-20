@@ -1,0 +1,8 @@
+v1.2.0-final
+Release Date: 2026-09-20
+Core ML: XGBoost Tuned (32 Features, Threshold 0.72)
+Vector Search: FAISS Inner-Product Index (512-d Multimodal CLIP Embeddings)
+GIS Layer: Leaflet.js Interactive Satellite Map (Esri World Imagery + Dark Matter)
+Reporting: Government Environmental Audit & Encroachment Intelligence Engine
+Dataset: OSCD Benchmark (100 Scenes) + 38 Tamil Nadu Districts Multi-Temporal Catalog
+Status: Fully Integrated, 100% Tested (72/72 Tests Passed), Production Ready

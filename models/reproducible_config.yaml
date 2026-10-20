@@ -1,0 +1,79 @@
+band_mapping:
+  blue: B02
+  green: B03
+  nir: B08
+  red: B04
+  swir: B11
+dataset:
+  images_subdir: Onera Satellite Change Detection dataset - Images
+  processed_dir: data/processed
+  raw_dir: data/oscd100
+  test_labels_subdir: Onera Satellite Change Detection dataset - Test Labels
+  train_labels_subdir: Onera Satellite Change Detection dataset - Train Labels
+  val_labels_subdir: Onera Satellite Change Detection dataset - Val Labels
+features:
+  feature_names:
+  - R_T1
+  - G_T1
+  - B_T1
+  - R_T2
+  - G_T2
+  - B_T2
+  - R_diff
+  - G_diff
+  - B_diff
+  - NDVI_T1
+  - NDVI_T2
+  - NDVI_diff
+  - NDBI_T1
+  - NDBI_T2
+  - NDBI_diff
+  - RGB_diff_mag
+outputs:
+  dir: outputs
+  models_dir: models
+  visualizations_dir: outputs/visualizations
+preprocessing:
+  nan_fill_value: 0.0
+  reflectance_scale: 10000.0
+selected_model:
+  features:
+  - R_T1
+  - G_T1
+  - B_T1
+  - R_T2
+  - G_T2
+  - B_T2
+  - R_diff
+  - G_diff
+  - B_diff
+  - RGB_diff_mag
+  - NDVI_T1
+  - NDVI_T2
+  - NDVI_diff
+  - NDBI_T1
+  - NDBI_T2
+  - NDBI_diff
+  - R_abs_diff
+  - G_abs_diff
+  - B_abs_diff
+  - NDVI_abs_diff
+  - NDBI_abs_diff
+  - R_rel_change
+  - G_rel_change
+  - B_rel_change
+  - NDVI_rel_change
+  - mean_3x3_T1_red
+  - mean_3x3_T2_red
+  - mean_3x3_T1_nir
+  - mean_3x3_T2_nir
+  - mean_3x3_RGB_diff_mag
+  - delta_mean_3x3_red
+  - std_3x3_RGB_diff_mag
+  post_processing:
+    close_kernel: 3
+    min_size: 5
+    open_kernel: 3
+  sampling_strategy: Downsampled (1:3)
+  scale_pos_weight: None
+  threshold: 0.72

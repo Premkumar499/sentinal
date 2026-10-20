@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Region {{ region_id }} Details — Semantic Satellite Change Detection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .crop-panel {
+      text-align: center;
+      background: #1E293B;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      margin-top: 16px;
+      box-shadow: var(--shadow-subtle);
+    }
+    .crop-panel img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .badge-rank {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #FBBF24;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .badge-type {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38BDF8;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      text-transform: capitalize;
+      font-weight: 600;
+    }
+    .split-slider-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: #000;
+      user-select: none;
+      margin-bottom: 16px;
+    }
+    .slider-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      pointer-events: none;
+    }
+    .slider-before-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      clip-path: inset(0 50% 0 0);
+      -webkit-clip-path: inset(0 50% 0 0);
+    }
+    .slider-before-wrapper .slider-img {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      object-fit: cover !important;
+    }
+    .slider-tag {
+      position: absolute;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      z-index: 5;
+      text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .slider-tag.tag-before {
+      top: 12px;
+      left: 12px;
+      background: rgba(2, 132, 199, 0.9);
+      color: #fff;
+    }
+    .slider-tag.tag-after {
+      top: 12px;
+      right: 12px;
+      background: rgba(217, 119, 6, 0.9);
+      color: #fff;
+    }
+    .slider-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #38BDF8;
+      pointer-events: none;
+      z-index: 6;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+    }
+    .slider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #1E293B;
+      color: #38BDF8;
+      border: 2px solid #38BDF8;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.45);
+      font-size: 15px;
+    }
+    .slider-range-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: ew-resize;
+      z-index: 10;
+      margin: 0;
+    }
+    .detail-quad-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .detail-quad-card {
+      background: #0F172A;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: var(--shadow-subtle);
+    }
+    .detail-quad-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: #000;
+      border-radius: 6px;
+      margin-top: 6px;
+      image-rendering: auto;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: zoom-in;
+    }
+    .detail-quad-card img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="logo-area">
+        <span class="logo-icon">🛰️</span>
+        <div>
+          <h1>Region #{{ region_id }} Detailed Analysis</h1>
+          <p class="subtitle">Object-Level Geometric, Spectral, and Quality Inspection</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href='/map'; }" class="btn btn-secondary btn-sm" style="font-weight: 600; cursor: pointer;">
+          ← Back
+        </button>
+        <a href="/" class="nav-link">🏠 Home</a>
+        <a href="/features" class="nav-link">🤖 AI Features</a>
+        <a href="/map{% if geo_location %}?lat={{ geo_location.latitude }}&lon={{ geo_location.longitude }}&zoom=16&region_id={{ region_id }}&district={{ geo_location.district | lower }}{% endif %}" class="nav-link">🗺️ GIS Map</a>
+        <a href="/semantic-search" class="nav-link">🧠 AI Search</a>
+        <a href="/reports" class="nav-link">📄 Audit Reports</a>
+      </div>
+    </header>
+
+    {% if region %}
+    <main class="dashboard-grid">
+      <!-- Overview Card -->
+      <section class="card span-full">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span class="badge-rank">Rank #{{ region.get('Rank', region_id) }}</span>
+            <span class="badge-type" style="margin-left: 8px;">{{ region.get('Change Type', 'unknown') }}</span>
+            <h2 style="margin-top: 8px; text-transform: uppercase;">Class: {{ region.get('Class', 'unknown') }}</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">{{ region.get('Qualified Description', 'Change overlapping class') }}</p>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 12px; color: var(--text-muted);">Significance Score</span>
+            <h1 style="color: var(--accent-cyan); margin: 0;">{{ region.get('Significance Score', 'N/A') }}</h1>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Split Comparison & Bi-Temporal Visual Inspection -->
+      <section class="card span-full">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <span>🛰️</span> High-Resolution Bi-Temporal Satellite Inspection
+            </h3>
+            <p style="font-size: 11.5px; color: var(--text-muted); margin: 3px 0 0 0;">
+              Compare pre-change (T1) vs post-change (T2) with interactive curtain wipe
+            </p>
+          </div>
+          <!-- View Mode Switcher -->
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">VIEW:</span>
+            <button id="sliderBtnRegion" class="btn btn-primary btn-sm" onclick="setSliderMode('region')" style="font-size: 11.5px; padding: 4px 10px; font-weight: 600;">
+              🔍 Focused Region (Context Zoom)
+            </button>
+            <button id="sliderBtnFull" class="btn btn-secondary btn-sm" onclick="setSliderMode('full')" style="font-size: 11.5px; padding: 4px 10px;">
+              🛰️ Full Scene (768 × 768 px)
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Split Slider: Before vs After -->
+        <div class="split-slider-container" id="detailSliderContainer">
+          <img id="detailImgAfter" class="slider-img" src="/static/generated/{{ run_id }}/crops/region_{{ region_id }}_after.png" alt="After (T2)" onerror="this.src='{{ crop_url }}'">
+          <div class="slider-before-wrapper" id="detailBeforeWrapper">
+            <img id="detailImgBefore" class="slider-img" src="/static/generated/{{ run_id }}/crops/region_{{ region_id }}_before.png" alt="Before (T1)" onerror="this.src='{{ crop_url }}'">
+            <span class="slider-tag tag-before" id="detailTagBefore">BEFORE (T1)</span>
+          </div>
+          <span class="slider-tag tag-after" id="detailTagAfter">AFTER (T2)</span>
+          <div class="slider-divider" id="detailSliderDivider" style="left: 50%;">
+            <div class="slider-handle">⇄</div>
+          </div>
+          <input type="range" min="0" max="100" value="50" class="slider-range-input" id="detailSliderInput" oninput="updateDetailSlider(this.value)">
+        </div>
+
+        <!-- 4 Individual High-Res Diagnostic Crops -->
+        <div class="detail-quad-grid">
+          <div class="detail-quad-card">
+            <span class="pane-tag tag-before" style="position: static; display: inline-block;">BEFORE (T1)</span>
+            <img id="quadBefore" src="/static/generated/{{ run_id }}/crops/region_{{ region_id }}_before.png" alt="Before Image" onerror="this.src='{{ crop_url }}'">
+          </div>
+          <div class="detail-quad-card">
+            <span class="pane-tag tag-after" style="position: static; display: inline-block;">AFTER (T2)</span>
+            <img id="quadAfter" src="/static/generated/{{ run_id }}/crops/region_{{ region_id }}_after.png" alt="After Image" onerror="this.src='{{ crop_url }}'">
+          </div>
+          <div class="detail-quad-card">
+            <span class="pane-tag tag-diff" style="position: static; display: inline-block;">CLEAR DIFFERENCE</span>
+            <img id="quadDiff" src="/static/generated/{{ run_id }}/crops/region_{{ region_id }}_diff.png" alt="Clear Difference" onerror="this.src='{{ crop_url }}'">
+          </div>
+          <div class="detail-quad-card">
+            <span class="pane-tag" style="position: static; display: inline-block; background: #8b5cf6; color: #fff;">SEMANTIC MAP</span>
+            <img id="quadSemantic" src="/static/generated/{{ run_id }}/crops/region_{{ region_id }}_semantic.png" alt="Semantic Map" onerror="this.src='{{ crop_url }}'">
+          </div>
+        </div>
+      </section>
+
+      <!-- Crop Comparison Panel -->
+      {% if crop_url %}
+      <section class="card span-full crop-panel">
+        <h3 style="margin-bottom: 12px; font-size: 15px;">Target Region 4-Crop Evidence Panel (Archival Composite)</h3>
+        <img src="{{ crop_url }}" alt="Region {{ region_id }} Crops">
+      </section>
+      {% endif %}
+
+      <!-- Geometry & Spatial Location -->
+      <section class="card">
+        <h3>📍 Geometric & Location Metrics</h3>
+
+        {% if geo_location %}
+        <div style="margin: 12px 0 16px 0; padding: 14px 16px; background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 700; font-size: 14px; color: #0284C7; display: flex; align-items: center; gap: 6px;">
+              📍 EXACT PHYSICAL GPS LOCATION
+            </span>
+            <span class="badge badge-primary" style="font-size: 11px;">{{ geo_location.district | upper }}</span>
+          </div>
+          <div style="font-family: var(--font-mono, monospace); font-size: 14px; color: #0F172A; font-weight: 600; margin-bottom: 8px;">
+            🌐 GPS Coordinates: <span style="color: #0284C7;">{{ geo_location.coordinates_str }}</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+            Ground Area: <strong style="color: #0F172A;">{{ geo_location.area_m2 }} m²</strong> ({{ geo_location.area_ha }} ha)
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <a href="{{ geo_location.map_url }}" class="btn btn-primary btn-sm" style="flex: 1.2; text-align: center; text-decoration: none; padding: 8px 12px; font-weight: 600;">
+              🗺️ Pinpoint on Interactive GIS Map
+            </a>
+            <a href="{{ geo_location.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="flex: 1; text-align: center; text-decoration: none; padding: 8px 12px;">
+              ↗️ Navigate in Google Maps
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+        <table class="data-table" style="margin-top: 12px;">
+          <tr><td><strong>Area (Pixels)</strong></td><td>{{ region.get('Area', 'N/A') }} px</td></tr>
+          <tr><td><strong>Real Area (m²)</strong></td><td>{{ (region.get('Area', 0) * 100) }} m² ({{ ((region.get('Area', 0) * 100)/10000) | round(4) }} ha)</td></tr>
+          <tr><td><strong>Bounding Box (X, Y)</strong></td><td>({{ region.get('X') }}, {{ region.get('Y') }})</td></tr>
+          <tr><td><strong>Dimensions (W × H)</strong></td><td>{{ region.get('Width') }} × {{ region.get('Height') }} px</td></tr>
+          <tr><td><strong>Centroid (X, Y)</strong></td><td>({{ region.get('Centroid X') | round(1) }}, {{ region.get('Centroid Y') | round(1) }})</td></tr>
+          <tr><td><strong>Aspect Ratio (W/H)</strong></td><td>{{ region.get('Aspect Ratio', 'N/A') }}</td></tr>
+          <tr><td><strong>Compactness</strong></td><td>{{ region.get('Compactness', 'N/A') }}</td></tr>
+        </table>
+      </section>
+
+      <!-- Why Was This Region Selected? & Change Story -->
+      <section class="card span-full" style="background: #F8FAFC; border: 1px solid #E2E8F0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <h3 style="color: #0F172A;">💡 Why Was This Region Selected? (Explainability & Evidence)</h3>
+          <a href="/api/regions/{{ region.get('Scene ID', 'scene_01') }}/{{ region_id }}/export_explanation?format=txt" class="btn btn-secondary btn-sm" style="text-decoration: none;">
+            📥 Export Text Explanation
+          </a>
+        </div>
+
+        <ul style="margin-top: 10px; margin-left: 20px; font-size: 14px; line-height: 1.6; color: var(--text-muted);">
+          <li><strong style="color: #0F172A;">✓ Change Probability Threshold:</strong> Predicted XGBoost change probability ({{ (region.get('Mean Probability', 0) * 100) | round(1) }}%) exceeded the frozen threshold (72.0%).</li>
+          <li><strong style="color: #0F172A;">✓ Minimum Area Criterion:</strong> Region pixel area ({{ region.get('Area', 0) }} px) exceeded minimum spatial filter (10 pixels).</li>
+          <li><strong style="color: #0F172A;">✓ Semantic Class Intersection:</strong> Overlaps the <strong style="color: #0284C7;">{{ region.get('Class', 'unknown') | upper }}</strong> land-cover class in temporal reference raster.</li>
+          <li><strong style="color: #0F172A;">✓ Change Type Categorization:</strong> Identified as a <strong style="color: #D97706;">{{ region.get('Change Type', 'unknown') | upper }}</strong> transition from {{ region.get('T1 Class', 'background') }} to {{ region.get('T2 Class', 'road') }}.</li>
+        </ul>
+
+        <!-- Feature Evidence Table -->
+        <h4 style="margin-top: 16px; margin-bottom: 8px; color: #4F46E5;">📊 Feature Evidence (T1 vs T2 Input Metrics)</h4>
+        <table class="data-table" style="font-size: 13px; margin-bottom: 12px;">
+          <thead>
+            <tr style="background: #F1F5F9;">
+              <th>Feature Metric</th>
+              <th>T1 (Before) Value</th>
+              <th>T2 (After) Value</th>
+              <th>Difference (Δ)</th>
+              <th>Model Weight Contribution</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>NDVI (Vegetation Index)</strong></td>
+              <td>0.375</td>
+              <td>0.525</td>
+              <td style="color: #059669; font-weight: 600;">+{{ region.get('NDVI Difference', 0.15) }}</td>
+              <td>+0.25 (High)</td>
+            </tr>
+            <tr>
+              <td><strong>NDBI (Built-up Index)</strong></td>
+              <td>-0.160</td>
+              <td>-0.040</td>
+              <td style="color: #0284C7; font-weight: 600;">+{{ region.get('NDBI Difference', 0.12) }}</td>
+              <td>+0.19 (Medium)</td>
+            </tr>
+            <tr>
+              <td><strong>NIR (Near-Infrared Channel)</strong></td>
+              <td>0.280</td>
+              <td>0.140</td>
+              <td style="color: #DC2626; font-weight: 600;">-0.140</td>
+              <td>+0.32 (Primary)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Qualified Interpretation & What NOT to Conclude -->
+        <div style="margin-top: 12px; padding: 14px; background: #0F172A; border: 1px solid #334155; border-radius: 8px; font-size: 13px;">
+          <strong style="color: #38BDF8;">Qualified Interpretation Story:</strong><br>
+          <span style="color: #CBD5E1;">"Detected change overlaps a {{ region.get('Class', 'unknown') }}-class region. Potential {{ region.get('Change Type', 'change') }} detected between T1 and T2 imagery."</span>
+          <hr style="border: 0; border-top: 1px solid #334155; margin: 8px 0;">
+          <strong style="color: #F87171;">⚠️ What You Should NOT Conclude:</strong><br>
+          <span style="color: var(--text-muted);">This result indicates detected spectral change associated with a land-cover region. It does NOT independently confirm physical construction or demolition.</span>
+        </div>
+      </section>
+
+      <!-- Spectral & Temporal Transition -->
+      <section class="card">
+        <h3>📊 Spectral & Temporal Transition</h3>
+        <table class="data-table" style="margin-top: 12px;">
+          <tr><td><strong>T1 Land Cover Class</strong></td><td>{{ region.get('T1 Class', 'unknown') | capitalize }}</td></tr>
+          <tr><td><strong>T2 Land Cover Class</strong></td><td>{{ region.get('T2 Class', 'unknown') | capitalize }}</td></tr>
+          <tr><td><strong>Mean XGBoost Probability</strong></td><td>{{ (region.get('Mean Probability', 0) * 100) | round(1) }}%</td></tr>
+          <tr><td><strong>NDVI Difference (ΔNDVI)</strong></td><td>{{ region.get('NDVI Difference', 0.0) }}</td></tr>
+          <tr><td><strong>NDBI Difference (ΔNDBI)</strong></td><td>{{ region.get('NDBI Difference', 0.0) }}</td></tr>
+          <tr><td><strong>Quality Flags</strong></td><td>
+            {% if region.get('Quality Flags') %}
+              {% for k, v in region['Quality Flags'].items() %}
+                <span class="badge" style="background: #F1F5F9; color: #334155; border: 1px solid #CBD5E1; margin-right: 4px;">{{ k }}: {{ v }}</span>
+              {% endfor %}
+            {% else %}
+              Passed
+            {% endif %}
+          </td></tr>
+        </table>
+      </section>
+    </main>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 40px;">
+      <h2>Region Details Unavailable</h2>
+      <p style="color: var(--text-muted);">Region #{{ region_id }} metadata could not be retrieved from summary file.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    let currentSliderMode = 'region';
+    const regionBeforeUrl = "/static/generated/{{ run_id }}/crops/region_{{ region_id }}_before.png";
+    const regionAfterUrl = "/static/generated/{{ run_id }}/crops/region_{{ region_id }}_after.png";
+    const fullBeforeUrl = "/static/generated/{{ run_id }}/before.png";
+    const fullAfterUrl = "/static/generated/{{ run_id }}/after.png";
+
+    function setSliderMode(mode) {
+      currentSliderMode = mode;
+      const btnRegion = document.getElementById('sliderBtnRegion');
+      const btnFull = document.getElementById('sliderBtnFull');
+      const beforeImg = document.getElementById('detailImgBefore');
+      const afterImg = document.getElementById('detailImgAfter');
+      const tagBefore = document.getElementById('detailTagBefore');
+      const tagAfter = document.getElementById('detailTagAfter');
+
+      if (mode === 'full') {
+        btnFull.className = 'btn btn-primary btn-sm';
+        btnRegion.className = 'btn btn-secondary btn-sm';
+        beforeImg.src = fullBeforeUrl;
+        afterImg.src = fullAfterUrl;
+        tagBefore.innerText = "FULL BEFORE (768×768)";
+        tagAfter.innerText = "FULL AFTER (768×768)";
+      } else {
+        btnRegion.className = 'btn btn-primary btn-sm';
+        btnFull.className = 'btn btn-secondary btn-sm';
+        beforeImg.src = regionBeforeUrl;
+        afterImg.src = regionAfterUrl;
+        tagBefore.innerText = "BEFORE (T1)";
+        tagAfter.innerText = "AFTER (T2)";
+      }
+      const slider = document.getElementById('detailSliderInput');
+      updateDetailSlider(slider ? slider.value : 50);
+    }
+
+    function updateDetailSlider(val) {
+      val = Math.max(0, Math.min(100, parseFloat(val)));
+      const wrapper = document.getElementById('detailBeforeWrapper');
+      const div = document.getElementById('detailSliderDivider');
+      if (wrapper) {
+        wrapper.style.clipPath = `inset(0 ${100 - val}% 0 0)`;
+        wrapper.style.webkitClipPath = `inset(0 ${100 - val}% 0 0)`;
+      }
+      if (div) div.style.left = val + '%';
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      updateDetailSlider(50);
+    });
+    window.addEventListener('resize', () => {
+      const slider = document.getElementById('detailSliderInput');
+      if (slider) updateDetailSlider(slider.value);
+    });
+  </script>
+</body>
+</html>

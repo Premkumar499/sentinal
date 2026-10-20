@@ -1,0 +1,86 @@
+<!-- DOCKED ENTERPRISE SIDEBAR NAVIGATION (STITCH DEEP SLATE NAVY SPEC) -->
+<aside class="w-64 bg-[#0F172A] border-r border-slate-800/90 flex flex-col fixed inset-y-0 left-0 z-50 select-none shadow-lg">
+  <!-- Brand Header -->
+  <div class="h-20 px-5 flex items-center justify-between border-b border-slate-800">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-md shadow-cyan-500/20 relative text-white">
+        <span class="text-xl">🛰️</span>
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -top-0.5 -right-0.5 radar-dot ring-2 ring-slate-900"></span>
+      </div>
+      <div>
+        <h1 class="font-display font-extrabold text-[15px] tracking-tight text-slate-100 leading-tight">GEOPRISM AI</h1>
+        <p class="font-mono text-[9px] text-cyan-400 font-bold tracking-widest uppercase">Earth AI Observation</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation List -->
+  <div class="flex-1 py-5 px-3.5 overflow-y-auto space-y-1">
+    <div class="px-3 pb-2 pt-1 text-[10.5px] font-bold tracking-wider text-slate-500 uppercase font-mono">
+      MISSION INTELLIGENCE
+    </div>
+
+    <!-- 1. Dashboard -->
+    <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group {% if request.path == '/' or active == 'dashboard' %}bg-slate-800/90 text-cyan-400 border-r-2 border-cyan-400 font-bold shadow-xs{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.path == '/' or active == 'dashboard' %}text-cyan-400{% else %}text-slate-500 group-hover:text-cyan-400{% endif %}">dashboard</span>
+      <span class="text-xs">Overview</span>
+    </a>
+
+    <!-- 2. Info Chat Bot -->
+    <a href="/info-chatbot" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group {% if request.path.startswith('/info-chatbot') or active == 'info' %}bg-slate-800/90 text-cyan-400 border-r-2 border-cyan-400 font-bold shadow-xs{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.path.startswith('/info-chatbot') or active == 'info' %}text-cyan-400{% else %}text-slate-500 group-hover:text-emerald-400{% endif %}">chat</span>
+      <span class="text-xs">Info Chat Bot</span>
+      <span class="ml-auto text-[9.5px] font-mono {% if request.path.startswith('/info-chatbot') or active == 'info' %}text-cyan-300 bg-cyan-950/80 border border-cyan-800/60{% else %}text-emerald-400 bg-emerald-950/50 border border-emerald-900/60{% endif %} px-2 py-0.5 rounded font-bold">Text AI</span>
+    </a>
+
+    <!-- 3. Image Chat Bot -->
+    <a href="/image-chatbot" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group {% if request.path.startswith('/image-chatbot') or active == 'image' %}bg-slate-800/90 text-cyan-400 border-r-2 border-cyan-400 font-bold shadow-xs{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.path.startswith('/image-chatbot') or active == 'image' %}text-cyan-400{% else %}text-slate-500 group-hover:text-indigo-400{% endif %}">photo_library</span>
+      <span class="text-xs">Image Chat Bot</span>
+      <span class="ml-auto text-[9.5px] font-mono {% if request.path.startswith('/image-chatbot') or active == 'image' %}text-cyan-300 bg-cyan-950/80 border border-cyan-800/60{% else %}text-indigo-400 bg-indigo-950/50 border border-indigo-900/60{% endif %} px-2 py-0.5 rounded font-bold">Visual</span>
+    </a>
+
+    <div class="px-3 pb-2 pt-4 text-[10.5px] font-bold tracking-wider text-slate-500 uppercase font-mono">
+      SPATIAL ANALYTICS & CATALOG
+    </div>
+
+    <!-- 4. Semantic Search (Dual Text & Image Similar Area Search) -->
+    <a href="/semantic-search" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group {% if request.path.startswith('/semantic-search') or request.path.startswith('/search') or active == 'search' %}bg-slate-800/90 text-cyan-400 border-r-2 border-cyan-400 font-bold shadow-xs{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.path.startswith('/semantic-search') or request.path.startswith('/search') or active == 'search' %}text-cyan-400{% else %}text-slate-500 group-hover:text-cyan-400{% endif %}">search_insights</span>
+      <span class="text-xs">Semantic Search</span>
+      <span class="ml-auto text-[9.5px] font-mono {% if request.path.startswith('/semantic-search') or request.path.startswith('/search') or active == 'search' %}text-cyan-300 bg-cyan-950/80 border border-cyan-800/60{% else %}text-cyan-400 bg-slate-800 border border-slate-700{% endif %} px-2 py-0.5 rounded font-bold">512-d</span>
+    </a>
+
+
+    <!-- 6. GIS Map -->
+    <a href="/map" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group {% if request.path.startswith('/map') or active == 'map' %}bg-slate-800/90 text-cyan-400 border-r-2 border-cyan-400 font-bold shadow-xs{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.path.startswith('/map') or active == 'map' %}text-cyan-400{% else %}text-slate-500 group-hover:text-amber-400{% endif %}">map</span>
+      <span class="text-xs">GIS Map</span>
+    </a>
+
+    <!-- 7. Audit Reports -->
+    <a href="/reports" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group {% if request.path.startswith('/reports') or active == 'reports' %}bg-slate-800/90 text-cyan-400 border-r-2 border-cyan-400 font-bold shadow-xs{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 font-medium{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.path.startswith('/reports') or active == 'reports' %}text-cyan-400{% else %}text-slate-500 group-hover:text-rose-400{% endif %}">assignment</span>
+      <span class="text-xs">Audit Reports</span>
+    </a>
+  </div>
+
+  <!-- Bottom Operational Status Card -->
+  <div class="p-3.5 border-t border-slate-800 bg-[#0B132B]/80">
+    <div class="bg-slate-800/90 border border-slate-700/80 rounded-xl p-3 flex items-center justify-between shadow-xs">
+      <div class="flex items-center gap-2.5">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+        </span>
+        <div>
+          <div class="text-[11.5px] font-bold text-slate-200">Online & Monitoring</div>
+          <div class="text-[9.5px] font-mono text-slate-400">Sentinel-2 • 10m GSD</div>
+        </div>
+      </div>
+      <span class="text-[9.5px] font-mono text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full">
+        LIVE
+      </span>
+    </div>
+  </div>
+</aside>

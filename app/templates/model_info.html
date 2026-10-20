@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Architecture & Explainability — Semantic Satellite Change Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface-canvas": "#0F172A",
+            "surface-card": "#1E293B",
+            "surface-hover": "#243248",
+            "surface-border": "#334155",
+            "primary": "#0284C7",
+            "primary-hover": "#0369A1",
+            "accent-cyan": "#38BDF8"
+          },
+          fontFamily: {
+            "display": ["Geist", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-[#0F172A] text-slate-100 min-h-screen font-sans flex antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- Docked Sidebar -->
+  {% include 'sidebar.html' %}
+
+  <!-- Main Content Viewport -->
+  <div class="flex-1 flex flex-col min-w-0 pl-64 h-screen overflow-y-auto">
+
+    <!-- Top Sticky Bar -->
+    <header class="sticky top-0 z-40 bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-700/80 px-6 py-4 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-3">
+        <span class="p-2 rounded-lg bg-sky-950/70 text-sky-400 font-bold border border-sky-800/50">
+          <span class="material-symbols-outlined text-[20px]">memory</span>
+        </span>
+        <div>
+          <h2 class="font-display font-bold text-base text-white tracking-tight">Model Architecture & Explainability</h2>
+          <p class="text-xs text-slate-400 font-medium">Frozen XGBoost Gradient Booster • Global Feature Attributions</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-emerald-950/70 text-emerald-300 border border-emerald-800/60 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          xgboost_v1.0_frozen
+        </span>
+        <a href="/" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center gap-1.5 shadow-xs">
+          <span class="material-symbols-outlined text-[16px]">dashboard</span>
+          Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Workspace Body -->
+    <main class="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+      <!-- Overview Header -->
+      <section class="bg-gradient-to-r from-sky-950/50 via-slate-800/90 to-slate-900 border border-slate-700/80 rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-mono font-bold bg-sky-900/60 text-sky-300 border border-sky-700/50">
+            TRANSPARENT AI AUDIT
+          </span>
+          <span class="text-xs text-slate-400 font-mono">OSCD Benchmark Standard</span>
+        </div>
+        <h2 class="font-display text-xl md:text-2xl font-bold text-white">
+          Model Audit & Global Feature Interpretability
+        </h2>
+        <p class="text-sm text-slate-300 mt-1 max-w-3xl leading-relaxed">
+          Transparent algorithmic audit of the frozen gradient boosted decision tree classifier deployed for bi-temporal pixel change probability inference. Trained and evaluated against the Onera Satellite Change Detection (OSCD) benchmark.
+        </p>
+      </section>
+
+      <!-- 2-Col Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Left: Model System Specifications -->
+        <div class="bg-[#1E293B] border border-slate-700/80 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-700/60">
+            <span class="p-1.5 rounded-lg bg-sky-950/70 text-sky-400 border border-sky-800/50">
+              <span class="material-symbols-outlined text-[20px]">tune</span>
+            </span>
+            <div>
+              <h3 class="font-display text-sm font-bold text-white">Model Specifications & Hyperparameters</h3>
+              <p class="text-[11px] text-slate-400 font-mono">Inference Configuration</p>
+            </div>
+          </div>
+          <table class="w-full text-xs font-medium">
+            <tr class="border-b border-slate-700/60"><td class="text-slate-400 py-2.5">Classifier Type:</td><td class="font-mono font-bold text-slate-200 text-right py-2.5">XGBoost Booster (`xgboost_v1.0_frozen`)</td></tr>
+            <tr class="border-b border-slate-700/60"><td class="text-slate-400 py-2.5">Training Benchmark:</td><td class="font-medium text-slate-200 text-right py-2.5">OSCD (24 Global City Pairs)</td></tr>
+            <tr class="border-b border-slate-700/60"><td class="text-slate-400 py-2.5">Decision Threshold:</td><td class="text-right py-2.5"><span class="px-2 py-0.5 rounded text-[10.5px] font-bold font-mono bg-sky-950/70 text-sky-300 border border-sky-800/60">0.720 (Optimal F1 Balance)</span></td></tr>
+            <tr class="border-b border-slate-700/60"><td class="text-slate-400 py-2.5">F1 Target Metric:</td><td class="font-mono font-bold text-emerald-400 text-right py-2.5">0.814</td></tr>
+            <tr class="border-b border-slate-700/60"><td class="text-slate-400 py-2.5">Intersection over Union (IoU):</td><td class="font-mono font-bold text-sky-400 text-right py-2.5">0.687</td></tr>
+            <tr class="border-b border-slate-700/60"><td class="text-slate-400 py-2.5">Precision / Recall:</td><td class="font-mono font-semibold text-slate-200 text-right py-2.5">83.2% / 79.7%</td></tr>
+            <tr><td class="text-slate-400 py-2.5">Execution Environment:</td><td class="font-medium text-slate-200 text-right py-2.5">CPU Only (Lightweight C++ Runtime)</td></tr>
+          </table>
+        </div>
+
+        <!-- Right: Global Feature Importance Chart -->
+        <div class="bg-[#1E293B] border border-slate-700/80 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-700/60">
+            <span class="p-1.5 rounded-lg bg-emerald-950/70 text-emerald-400 border border-emerald-800/50">
+              <span class="material-symbols-outlined text-[20px]">bar_chart</span>
+            </span>
+            <div>
+              <h3 class="font-display text-sm font-bold text-white">Global Feature Importance (Gain Attributions)</h3>
+              <p class="text-[11px] text-slate-400 font-mono">Relative Information Gain %</p>
+            </div>
+          </div>
+          <div class="space-y-4">
+            {% for f in features %}
+            <div>
+              <div class="flex justify-between items-center text-xs mb-1.5">
+                <span class="font-bold text-sky-300">#{{ f.rank }} {{ f.feature }}</span>
+                <span class="font-mono text-slate-300 font-semibold">{{ (f.importance * 100) | round(1) }}% gain</span>
+              </div>
+              <div class="w-full bg-[#0F172A] border border-slate-700/80 h-2.5 rounded-full overflow-hidden">
+                <div class="bg-gradient-to-r from-sky-500 to-cyan-400 h-full rounded-full transition-all duration-500" style="width: {{ (f.importance * 100 * 2.5) }}%;"></div>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-1">{{ f.description }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Limitations & Cautious Use Guidelines -->
+      <section class="bg-amber-950/30 border border-amber-800/50 rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-2 text-amber-300 font-display font-bold text-sm mb-3">
+          <span class="material-symbols-outlined text-[20px] text-amber-400">warning</span>
+          Scientific Limitations & Ethical Use Disclaimers
+        </div>
+        <ul class="space-y-2 text-xs text-amber-200/90 leading-relaxed">
+          <li>
+            <strong class="text-amber-100 font-semibold">1. Feature Correlation vs Causality:</strong> High feature gain for $\Delta\text{NIR}$ or $\Delta\text{NDVI}$ indicates strong model reliance on spectral divergence, NOT independent confirmation of physical construction or demolition.
+          </li>
+          <li>
+            <strong class="text-amber-100 font-semibold">2. Non-Calibrated Probabilities:</strong> XGBoost output change probabilities represent relative decision confidence for the thresholded pixel cluster, not absolute real-world ground truth probabilities.
+          </li>
+          <li>
+            <strong class="text-amber-100 font-semibold">3. Decoupled Semantic Reference:</strong> Semantic class labels originate from the reference multi-spectral land-cover pipeline. Classification precision depends on the underlying reference raster quality.
+          </li>
+        </ul>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>

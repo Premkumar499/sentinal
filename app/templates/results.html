@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis Results — {{ data.scene_id }} — Semantic Satellite Change Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface-canvas": "#0F172A",
+            "surface-card": "#1E293B",
+            "surface-hover": "#27354A",
+            "surface-border": "#334155",
+            "primary": "#0284C7",
+            "primary-hover": "#0369A1"
+          },
+          fontFamily: {
+            "display": ["Geist", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .breakdown-card {
+      background: #0F172A;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .breakdown-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .class-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-1 { background: #FFE082; }
+    .dot-2 { background: #EF5350; }
+    .dot-3 { background: #42A5F5; }
+    .dot-4 { background: #66BB6A; }
+    .dot-5 { background: #FFA726; }
+    .dot-0 { background: #AB47BC; }
+    .class-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #F8FAFC;
+    }
+    .breakdown-pixels {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: #F8FAFC;
+    }
+    .breakdown-pct {
+      font-size: 12px;
+      color: #CBD5E1;
+      margin-top: 2px;
+      font-family: var(--font-mono);
+    }
+    .viz-box {
+      background: #1E293B;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-subtle);
+    }
+    .viz-label {
+      display: block;
+      padding: 8px 12px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #CBD5E1;
+      background: #0F172A;
+      border-top: 1px solid #334155;
+      text-align: center;
+    }
+    .legend-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      background: #0F172A;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+    .legend-title {
+      font-weight: 700;
+      color: #F8FAFC;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #CBD5E1;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .disclaimer-banner {
+      background: #0F172A;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      font-size: 12.5px;
+      color: #94A3B8;
+      margin-top: 20px;
+    }
+    .tag-class {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: #1E293B;
+      border: 1px solid #334155;
+      font-weight: 600;
+      color: #F8FAFC;
+    }
+  </style>
+</head>
+<body class="bg-[#0F172A] text-slate-100 font-sans min-h-screen flex antialiased selection:bg-cyan-500 selection:text-white">
+  {% include 'sidebar.html' %}
+
+  <!-- Main Analysis Workspace -->
+  <div class="flex-1 pl-64 flex flex-col min-h-screen bg-[#0F172A] overflow-y-auto">
+
+    <!-- Top App Bar (Stitch Specification) -->
+    <header class="bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-800 h-16 flex items-center justify-between px-6 sticky top-0 z-40 shadow-xs">
+      <div class="flex items-center space-x-3">
+        <span class="bg-cyan-950/70 text-cyan-300 font-mono text-[10.5px] font-bold px-2.5 py-1 rounded-full border border-cyan-800/80 flex items-center shadow-xs">
+          <span class="material-symbols-outlined text-[14px] mr-1 text-cyan-400">biotech</span>
+          ANALYSIS RUN COMPLETE
+        </span>
+        <span class="text-xs text-slate-600 font-mono hidden sm:inline">•</span>
+        <span class="text-xs text-slate-400 font-mono hidden sm:inline">Scene: {{ data.scene_id }}</span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <a href="/download/{{ data.run_id }}/zip" class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">archive</span>
+          ZIP Package
+        </a>
+        <a href="/download/{{ data.run_id }}/csv" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">table_chart</span>
+          CSV
+        </a>
+        <a href="/download/{{ data.run_id }}/json" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">data_object</span>
+          JSON
+        </a>
+      </div>
+    </header>
+
+    <div class="p-6 md:p-8 max-w-7xl w-full mx-auto space-y-6">
+      <h1 class="sr-only">Semantic Change Detection Results</h1>
+    <main class="main-content">
+      <!-- Top Metrics Summary Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">STATUS</span>
+          <span class="metric-value text-success">{% if data.change_detected %}CHANGE DETECTED{% else %}NO CHANGE{% endif %}</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">TOTAL CHANGED AREA</span>
+          <span class="metric-value text-accent">{{ data.change_percentage }}%</span>
+          <span class="metric-sub">{{ "{:,}".format(data.changed_pixels) }} / {{ "{:,}".format(data.total_pixels) }} px</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">UNCHANGED AREA</span>
+          <span class="metric-value text-success">{{ data.unchanged_percentage or (100.0 - data.change_percentage) | round(2) }}%</span>
+          <span class="metric-sub">{{ "{:,}".format(data.unchanged_pixels or (data.total_pixels - data.changed_pixels)) }} px</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">MEAN MODEL CONFIDENCE</span>
+          <span class="metric-value text-accent">{{ data.mean_confidence_percentage or 75.0 }}%</span>
+          <span class="metric-sub">Decision Threshold: {{ data.threshold_used }}</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">RAW IMAGE DIFF (MAD)</span>
+          <span class="metric-value">{{ data.difference_metrics.mean_abs_diff_percentage if data.difference_metrics else 'N/A' }}%</span>
+          <span class="metric-sub">RMSE: {{ data.difference_metrics.rmse_diff_percentage if data.difference_metrics else 'N/A' }}%</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">CHANGED REGIONS COUNT</span>
+          <span class="metric-value">{{ data.region_count }}</span>
+          <span class="metric-sub">Min Area: 10 px</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">LARGEST REGION</span>
+          <span class="metric-value text-accent">{{ data.largest_region or 'None' }}</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">TOTAL RUNTIME</span>
+          <span class="metric-value">{{ data.timing_seconds.total_sec }}s</span>
+          <span class="metric-sub">XGB Inference: {{ data.timing_seconds.xgb_inference_sec }}s</span>
+        </div>
+      </div>
+
+      <!-- Semantic Breakdown & Transition Matrix -->
+      <section class="card">
+        <h3>Class-Specific Change Breakdown & Temporal Transitions</h3>
+        <p class="card-subtitle">Detected change area intersecting physical land-cover classes (Showing % of change and % of total scene)</p>
+        {% set class_counts = {} %}
+        {% if regions %}
+          {% for r in regions %}
+            {% set cname = r.get('Class', r.get('Semantic Class', 'unknown')) | lower %}
+            {% set _ = class_counts.update({cname: class_counts.get(cname, 0) + 1}) %}
+          {% endfor %}
+        {% endif %}
+
+        <div class="breakdown-grid">
+          {% for cid, b in data.semantic_breakdown.items() %}
+            {% set c_lower = b.class_name | lower %}
+            {% set reg_cnt = class_counts.get(c_lower, 0) %}
+            <div class="breakdown-card class-{{ cid }}">
+              <div class="breakdown-header">
+                <span class="class-dot dot-{{ cid }}"></span>
+                <span class="class-name">{{ b.class_name | replace('_', ' ') | title }}</span>
+              </div>
+              <div class="breakdown-pixels">{{ "{:,}".format(b.pixels) }} px</div>
+              <div class="breakdown-pct"><strong style="color: #38BDF8;">{{ b.percentage_of_changed_area }}%</strong> of change</div>
+              <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ b.percentage_of_total_scene or ((b.pixels / data.total_pixels) * 100) | round(4) }}% of total scene</div>
+              {% if b.pixels > 0 and reg_cnt == 0 %}
+                <div style="font-size: 11px; color: #FBBF24; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                  <span>⚠️ Dispersed (<10px, 0 regions)</span>
+                </div>
+              {% elif reg_cnt > 0 %}
+                <div style="font-size: 11px; color: #34D399; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                  <span>✅ {{ reg_cnt }} region(s) in analysis</span>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if data.transition_matrix %}
+        <div style="margin-top: 20px;">
+          <h4 style="font-size: 14px; color: #94A3B8; margin-bottom: 8px;">Top Semantic Class Transitions ($T_1 \rightarrow T_2$ with Transition Share %)</h4>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            {% for tm in data.transition_matrix %}
+              <span style="background: #0F172A; border: 1px solid #334155; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-family: monospace; color: #F8FAFC;">
+                {{ tm.from_class | capitalize }} → {{ tm.to_class | capitalize }}: <strong>{{ tm.pixel_count }} px</strong>
+                {% if tm.percentage %}<span style="color: #38BDF8; margin-left: 4px; font-weight: 600;">({{ tm.percentage }}%)</span>{% endif %}
+              </span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </section>
+
+      <!-- Visual Dashboard (7-Panel Grid & Interactive Comparison) -->
+      <section class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+          <div>
+            <h3>Visual Dashboard & Physical Image Difference</h3>
+            <p class="card-subtitle">Comprehensive bi-temporal multi-spectral panels, raw difference heatmap, and semantic overlays</p>
+          </div>
+          <!-- Quick Toggle for Before / After Compare -->
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" id="btnToggleBlink" onclick="toggleImageBlink()" class="btn btn-secondary btn-sm" style="font-size: 12px; cursor: pointer;">
+              🔄 Auto-Blink T1/T2
+            </button>
+            <span class="badge badge-accent">7 Synchronized Panels</span>
+          </div>
+        </div>
+
+        <div class="viz-grid-6" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <div class="viz-box" id="panelT1">
+            <img src="{{ data.visualizations.before }}" id="imgT1" alt="Before T1 Image" style="width: 100%; border-radius: 6px;">
+            <span class="viz-label">Panel 1: Before ($T_1$ RGB Image)</span>
+          </div>
+          <div class="viz-box" id="panelT2">
+            <img src="{{ data.visualizations.after }}" id="imgT2" alt="After T2 Image" style="width: 100%; border-radius: 6px;">
+            <span class="viz-label">Panel 2: After ($T_2$ RGB Image)</span>
+          </div>
+          {% if data.visualizations.diff_heatmap %}
+          <div class="viz-box">
+            <img src="{{ data.visualizations.diff_heatmap }}" alt="Raw Difference Heatmap" style="width: 100%; border-radius: 6px;">
+            <span class="viz-label" style="color: #FBBF24;">Panel 3: Raw Image Difference Heatmap ($|\Delta RGB|$)</span>
+          </div>
+          {% endif %}
+          <div class="viz-box">
+            <img src="{{ data.visualizations.change_map }}" alt="XGBoost Change Mask" style="width: 100%; border-radius: 6px;">
+            <span class="viz-label">Panel 4: XGBoost Change Mask</span>
+          </div>
+          <div class="viz-box">
+            <img src="{{ data.visualizations.semantic_map }}" alt="Semantic Mask" style="width: 100%; border-radius: 6px;">
+            <span class="viz-label">Panel 5: Land Cover Mask ($T_2$)</span>
+          </div>
+          <div class="viz-box">
+            <img src="{{ data.visualizations.semantic_change_map }}" alt="Semantic Change Map" style="width: 100%; border-radius: 6px;">
+            <span class="viz-label">Panel 6: Semantic Change Map</span>
+          </div>
+          <div class="viz-box">
+            <img src="{{ data.visualizations.overlay }}" alt="Overlay Visualization" style="width: 100%; border-radius: 6px;">
+            <span class="viz-label">Panel 7: Transparent Overlay & BBoxes</span>
+          </div>
+        </div>
+
+        <!-- Visual Legend -->
+        <div class="legend-bar" style="margin-top: 14px;">
+          <span class="legend-title">Land Cover Legend:</span>
+          <span class="legend-item"><span class="legend-color" style="background:#FFE082;"></span> Road</span>
+          <span class="legend-item"><span class="legend-color" style="background:#EF5350;"></span> Building</span>
+          <span class="legend-item"><span class="legend-color" style="background:#42A5F5;"></span> Water</span>
+          <span class="legend-item"><span class="legend-color" style="background:#66BB6A;"></span> Vegetation</span>
+          <span class="legend-item"><span class="legend-color" style="background:#FFA726;"></span> Bare Land</span>
+          <span class="legend-item"><span class="legend-color" style="background:#AB47BC;"></span> Unknown / Unresolved</span>
+          <span class="legend-item" style="margin-left: auto;"><span class="legend-color" style="background: linear-gradient(90deg, #000, #900, #ff0);"></span> Diff Heatmap: 0% → 100% Intensity</span>
+        </div>
+      </section>
+
+      <script>
+        var blinkInterval = null;
+        var showingT1 = true;
+        function toggleImageBlink() {
+          var btn = document.getElementById('btnToggleBlink');
+          var imgT1 = document.getElementById('imgT1');
+          var srcT1 = "{{ data.visualizations.before }}";
+          var srcT2 = "{{ data.visualizations.after }}";
+
+          if (blinkInterval) {
+            clearInterval(blinkInterval);
+            blinkInterval = null;
+            imgT1.src = srcT1;
+            btn.innerHTML = "🔄 Auto-Blink T1/T2";
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+          } else {
+            btn.innerHTML = "⏹️ Stop Blinking";
+            btn.classList.remove('btn-secondary');
+            btn.classList.add('btn-primary');
+            blinkInterval = setInterval(function() {
+              showingT1 = !showingT1;
+              imgT1.src = showingT1 ? srcT1 : srcT2;
+            }, 600);
+          }
+        }
+      </script>
+
+      <!-- Connected Regions Table with Search Filters -->
+      <section class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+          <h3>Detected Changed Regions (Connected Component Analysis)</h3>
+          <div style="display: flex; gap: 10px;">
+            <select id="filterClass" onchange="filterRegions()" class="btn btn-secondary btn-sm" style="background: #0F172A; border: 1px solid #334155; color: #F8FAFC;">
+              <option value="all">Class: All ({{ regions | length }})</option>
+              <option value="road">Road ({{ class_counts.get('road', 0) }})</option>
+              <option value="building">Building ({{ class_counts.get('building', 0) }})</option>
+              <option value="water">Water ({{ class_counts.get('water', 0) }})</option>
+              <option value="vegetation">Vegetation ({{ class_counts.get('vegetation', 0) }})</option>
+              <option value="bare_land">Bare Land ({{ class_counts.get('bare_land', 0) }})</option>
+              <option value="unknown">Unknown ({{ class_counts.get('unknown', 0) }})</option>
+            </select>
+            <select id="filterType" onchange="filterRegions()" class="btn btn-secondary btn-sm" style="background: #0F172A; border: 1px solid #334155; color: #F8FAFC;">
+              <option value="all">Type: All</option>
+              <option value="new">New</option>
+              <option value="removed">Removed</option>
+              <option value="expanded">Expanded</option>
+              <option value="transition">Transition</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+        </div>
+
+        {% if regions and regions | length > 0 %}
+          <div class="table-responsive">
+            <table class="data-table" id="regionsTable">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>ID</th>
+                  <th>Class</th>
+                  <th>Change Type</th>
+                  <th>Area (px)</th>
+                  <th>% of Change</th>
+                  <th>% of Scene</th>
+                  <th>Confidence (%)</th>
+                  <th>Bounding Box (X, Y, W, H)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in regions %}
+                  <tr data-class="{{ r.get('Class', r.get('Semantic Class', 'unknown')) | lower }}" data-type="{{ r.get('Change Type', r.get('change_type', 'unknown')) | lower }}">
+                    <td><strong style="color: #FBBF24;">#{{ r.get('Rank', loop.index) }}</strong></td>
+                    <td><code class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-200">R{{ r.get('Region ID', r.get('id', loop.index)) }}</code></td>
+                    <td><span class="tag tag-class">{{ r.get('Class', r.get('Semantic Class', 'unknown')) | capitalize }}</span></td>
+                    <td><span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38BDF8; text-transform: capitalize; font-weight: 600;">{{ r.get('Change Type', 'unknown') }}</span></td>
+                    <td class="font-mono text-slate-200">{{ r.get('Area', r.get('Area (pixels)', 'N/A')) }} px</td>
+                    <td><strong style="color: #38BDF8;">{{ r.get('percentage_of_change_area', 'N/A') }}%</strong></td>
+                    <td><span style="color: #94A3B8;">{{ r.get('percentage_of_scene_area', 'N/A') }}%</span></td>
+                    <td><strong style="color: #34D399;">{{ r.get('confidence_percentage', (r.get('Significance Score', 0.0) * 100) | round(1) if r.get('Significance Score') is number else r.get('Significance Score', 'N/A')) }}%</strong></td>
+                    <td><code class="text-xs text-slate-400">({{ r.get('X', r.get('BBox X', 0)) }}, {{ r.get('Y', r.get('BBox Y', 0)) }}, {{ r.get('Width', 0) }}, {{ r.get('Height', 0) }})</code></td>
+                    <td>
+                      <a href="/region/{{ data.run_id }}/{{ r.get('Region ID', loop.index) }}" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 10px;">Inspect Details 🔍</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+                <tr id="noMatchingRegionsRow" style="display: none;">
+                  <td colspan="10" style="text-align: center; color: #94A3B8; padding: 32px 16px; font-size: 14px;">
+                    <span id="noMatchingMsg">🔍 No regions match the selected class or type filter.</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted">No significant changed regions extracted above threshold MIN_REGION_PIXELS = 10.</p>
+        {% endif %}
+      </section>
+
+      <script>
+        function filterRegions() {
+          var cls = document.getElementById('filterClass').value.toLowerCase();
+          var typ = document.getElementById('filterType').value.toLowerCase();
+          var rows = document.querySelectorAll('#regionsTable tbody tr:not(#noMatchingRegionsRow)');
+          var visibleCount = 0;
+          rows.forEach(function(row) {
+            var rCls = row.getAttribute('data-class');
+            var rTyp = row.getAttribute('data-type');
+            var matchCls = (cls === 'all' || rCls === cls);
+            var matchTyp = (typ === 'all' || rTyp === typ);
+            var show = (matchCls && matchTyp);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+          });
+          var noRow = document.getElementById('noMatchingRegionsRow');
+          var noMsg = document.getElementById('noMatchingMsg');
+          if (noRow) {
+            if (visibleCount === 0) {
+              noRow.style.display = '';
+              if (noMsg) {
+                if (cls !== 'all') {
+                  var cCapital = cls.charAt(0).toUpperCase() + cls.slice(1).replace('_', ' ');
+                  noMsg.innerHTML = "ℹ️ No contiguous changed regions (≥ 10 px) found for <strong>" + cCapital + "</strong>. Any minor pixels detected in the summary are dispersed micro-features (< 10 px) below the contiguous region threshold.";
+                } else {
+                  noMsg.innerText = "🔍 No regions match the selected filter.";
+                }
+              }
+            } else {
+              noRow.style.display = 'none';
+            }
+          }
+        }
+      </script>
+
+      <!-- Technical Details Accordion -->
+      <section class="card">
+        <details>
+          <summary class="details-summary" style="cursor: pointer; font-weight: 600; color: #F8FAFC;">🛠️ Technical Execution Details (Click to expand)</summary>
+          <div class="details-content" style="margin-top: 14px; padding-top: 14px; border-top: 1px solid #334155;">
+            <div class="grid-2col font-mono" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+              <div>
+                <p><strong>Run ID:</strong> {{ data.run_id }}</p>
+                <p><strong>Dataset Split:</strong> OSCD Test Set</p>
+                <p><strong>Classification Model:</strong> XGBoost Tuned (32 features)</p>
+                <p><strong>Threshold Applied:</strong> {{ data.threshold_used }}</p>
+              </div>
+              <div>
+                <p><strong>Feature Extraction Time:</strong> {{ data.timing_seconds.feature_extraction_sec }}s</p>
+                <p><strong>Inference Time:</strong> {{ data.timing_seconds.xgb_inference_sec }}s</p>
+                <p><strong>Semantic Layer Time:</strong> {{ data.timing_seconds.semantic_sec }}s</p>
+                <p><strong>Visualization Time:</strong> {{ data.timing_seconds.visualization_sec }}s</p>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Disclaimer Note -->
+      <div class="disclaimer-banner">
+        <strong>Technical Wording Note:</strong> Results represent <em>"change overlapping [class] class"</em> produced by spectral index rules and distance transform thinness heuristics. OSCD contains binary change labels only.
+      </div>
+    </main>
+  </div>
+</body>
+</html>
